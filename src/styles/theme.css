@@ -1,0 +1,60 @@
+@import '@fontsource/bricolage-grotesque/latin-600.css';
+@import '@fontsource/source-sans-3/latin-400.css';
+@import '@fontsource/source-sans-3/latin-600.css';
+@import '@fontsource/ibm-plex-mono/latin-400.css';
+
+:root {
+  --color-canvas: #f4f6f5;
+  --color-surface: #fff;
+  --color-ink: #1f2924;
+  --color-muted: #56645c;
+  --color-primary: #17664a;
+  --color-primary-hover: #105039;
+  --color-cobalt: #2e5bcc;
+  --color-gold: #e2bc58;
+  --color-border: #d6dfd9;
+  --color-control-border: #78847d;
+  --color-error: #ad3546;
+  --color-error-bg: #fbecef;
+  --font-body: 'Source Sans 3', sans-serif;
+  --font-heading: 'Bricolage Grotesque', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  font: 16px/1.5 var(--font-body);
+  color: var(--color-ink);
+  background: var(--color-canvas);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; letter-spacing: 0; }
+body { margin: 0; min-width: 0; }
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  content: '';
+  background-image: url('/francanglais-grain.png'),
+    linear-gradient(#17664a08 1px, transparent 1px),
+    linear-gradient(90deg, #17664a08 1px, transparent 1px);
+  background-size: 48px 48px, 32px 32px, 32px 32px;
+  pointer-events: none;
+}
+button, textarea, input { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+button, a, textarea, summary { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid var(--color-cobalt); outline-offset: 3px; }
+h1, h2, h3 { font-family: var(--font-heading); line-height: 1.2; margin: 0; }
+p { margin: 0; }
+svg { flex-shrink: 0; }
+::selection { color: var(--color-ink); background: #f1dea4; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
