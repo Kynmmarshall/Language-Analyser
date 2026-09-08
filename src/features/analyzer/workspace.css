@@ -129,6 +129,25 @@ button:disabled { color: #6b786f; background: #eff2f0; border-color: #d6dfd9; }
 .analysis-placeholder h3 { font-size: 19px; }
 .analysis-placeholder p { color: var(--color-muted); font-size: 14px; }
 .analysis-placeholder button { margin-top: 4px; }
+.analysis-placeholder.analysis-error > svg { color: #c0362c; }
+.spin { animation: analyzer-spin 0.9s linear infinite; }
+@keyframes analyzer-spin { to { transform: rotate(360deg); } }
+.analysis-result { display: flex; flex-direction: column; gap: 12px; padding: 4px 0 20px; }
+.analysis-result-stale { opacity: 0.55; }
+.analysis-verdict { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600; }
+.analysis-verdict > svg { color: var(--color-primary); }
+.analysis-reason { color: var(--color-muted); font-size: 13px; margin: -6px 0 0; }
+.analysis-subheading { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-muted); margin: 6px 0 -2px; }
+.token-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.token-list li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 10px; }
+.token-raw { font-weight: 600; }
+.token-terminal, .token-pos { color: var(--color-muted); font-family: var(--font-mono, monospace); font-size: 12px; }
+.token-slang { color: var(--color-gold); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+.topic-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.topic-list li { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
+.topic-name { text-transform: capitalize; }
+.topic-terms { color: var(--color-muted); }
+.analysis-result > .secondary-button { align-self: flex-start; }
 .analysis-meta { margin: 0; font-size: 13px; }
 .analysis-meta > div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 16px; border-top: 1px solid var(--color-border); padding: 12px 0; }
 dt { color: var(--color-muted); }

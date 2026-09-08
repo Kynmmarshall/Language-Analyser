@@ -1,7 +1,9 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
-import { ArrowUpRight, MapPin, Quote, WifiOff } from 'lucide-react'
+import { ArrowUpRight, MapPin, Quote, Wifi, WifiOff } from 'lucide-react'
 import { createAnalysisRequest, inputError, parseAnalysisRequest } from '../../domain/francanglais'
+import { analyzeStatement, AnalysisApiError } from '../../domain/api'
+import type { AnalyzeResponse } from '../../domain/api'
 import { AnalysisPanel } from './AnalysisPanel'
 import { StatementEditor } from './StatementEditor'
 import './workspace.css'
@@ -13,10 +15,17 @@ export function FrancanglaisWorkspace() {
   const [provenance, setProvenance] = useState('Local draft')
   const [notice, setNotice] = useState('')
   const [importError, setImportError] = useState('')
+  const [result, setResult] = useState<AnalyzeResponse | null>(null)
+  const [analyzing, setAnalyzing] = useState(false)
+  const [analysisError, setAnalysisError] = useState<string | null>(null)
+  const [stale, setStale] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
   const draftVersion = useRef(0)
+  const abortController = useRef<AbortController | null>(null)
   const validationError = inputError(text)
   const request = validationError ? null : createAnalysisRequest(text)
+
+  useEffect(() => () => abortController.current?.abort(), [])
 
   function updateDraft(value: string, source = 'Local draft') {
     draftVersion.current += 1
@@ -24,6 +33,30 @@ export function FrancanglaisWorkspace() {
     setProvenance(source)
     setNotice('')
     setImportError('')
+    if (result) setStale(true)
+  }
+
+  async function runAnalysis() {
+    if (!request) return
+    abortController.current?.abort()
+    const controller = new AbortController()
+    abortController.current = controller
+    const version = draftVersion.current
+    setAnalyzing(true)
+    setAnalysisError(null)
+    try {
+      const response = await analyzeStatement(request, controller.signal)
+      if (version !== draftVersion.current) return
+      setResult(response)
+      setStale(false)
+    } catch (error) {
+      if (controller.signal.aborted) return
+      setAnalysisError(
+        error instanceof AnalysisApiError ? error.message : 'The analysis could not be completed.',
+      )
+    } finally {
+      if (version === draftVersion.current) setAnalyzing(false)
+    }
   }
 
   function clearDraft() {
@@ -81,7 +114,11 @@ export function FrancanglaisWorkspace() {
             <h1>Francanglais Studio<span className="title-dot">.</span></h1>
           </div>
           <p className="connection-status" id="analyzer-status">
-            <WifiOff size={16} aria-hidden="true" /> Analyzer not connected
+            {analysisError && !analyzing ? (
+              <><WifiOff size={16} aria-hidden="true" /> Analyzer unreachable</>
+            ) : (
+              <><Wifi size={16} aria-hidden="true" /> Analyzer connected</>
+            )}
           </p>
         </div>
         <div className="draft-bar"><span className="draft-indicator" /> {provenance}
@@ -93,7 +130,8 @@ export function FrancanglaisWorkspace() {
               provenance === 'Synthetic demo' ? 'Synthetic demo' : 'Local draft')}
             onClear={clearDraft} onImport={() => fileInput.current?.click()}
             onExport={exportInput} onExample={() => updateDraft(DEMO_TEXT, 'Synthetic demo')} />
-          <AnalysisPanel request={request} />
+          <AnalysisPanel request={request} result={result} loading={analyzing}
+            error={analysisError} stale={stale} onAnalyze={runAnalysis} />
         </div>
         <input ref={fileInput} type="file" accept=".json,application/json"
           aria-label="Import input JSON" hidden onChange={importInput} />
