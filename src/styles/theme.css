@@ -14,6 +14,10 @@
   --color-gold: #e2bc58;
   --color-border: #d6dfd9;
   --color-control-border: #78847d;
+  --color-success: #17664a;
+  --color-success-bg: #e8f3ec;
+  --color-warning: #83540c;
+  --color-warning-bg: #fff3d6;
   --color-error: #ad3546;
   --color-error-bg: #fbecef;
   --font-body: 'Source Sans 3', sans-serif;

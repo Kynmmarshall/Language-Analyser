@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
-import { ArrowUpRight, MapPin, Quote, Wifi, WifiOff } from 'lucide-react'
+import { MapPin, Wifi, WifiOff } from 'lucide-react'
 import { createAnalysisRequest, inputError, parseAnalysisRequest } from '../../domain/francanglais'
 import { analyzeStatement, AnalysisApiError } from '../../domain/api'
 import type { AnalyzeResponse } from '../../domain/api'
@@ -98,28 +98,19 @@ export function FrancanglaisWorkspace() {
   }
 
   return (
-    <div className="app-shell">
-      <a className="skip-link" href="#workspace">Skip to workspace</a>
-      <header className="app-header">
-        <a className="brand" href="#workspace" aria-label="Francanglais Studio workspace">
-          <span className="brand-mark"><Quote size={22} aria-hidden="true" /></span>
-          <span>FRANCANGLAIS<span className="brand-subtitle">STUDIO / CS4110</span></span>
-        </a>
-        <span className="workspace-marker">Workspace <ArrowUpRight size={16} aria-hidden="true" /></span>
-      </header>
-      <main id="workspace" tabIndex={-1}>
-        <div className="workspace-heading">
-          <div>
-            <p className="location"><MapPin size={14} aria-hidden="true" /> Yaound&eacute;, Cameroon</p>
-            <h1>Francanglais Studio<span className="title-dot">.</span></h1>
-          </div>
-          <p className="connection-status" id="analyzer-status">
-            {analysisError && !analyzing ? (
-              <><WifiOff size={16} aria-hidden="true" /> Analyzer unreachable</>
-            ) : (
-              <><Wifi size={16} aria-hidden="true" /> Analyzer connected</>
-            )}
-          </p>
+    <>
+      <div className="workspace-heading">
+        <div>
+          <p className="location"><MapPin size={14} aria-hidden="true" /> Yaound&eacute;, Cameroon</p>
+          <h1>Francanglais Studio<span className="title-dot">.</span></h1>
+        </div>
+        <p className="connection-status" id="analyzer-status">
+          {analysisError && !analyzing ? (
+            <><WifiOff size={16} aria-hidden="true" /> Analyzer unreachable</>
+          ) : (
+            <><Wifi size={16} aria-hidden="true" /> Analyzer connected</>
+          )}
+        </p>
         </div>
         <div className="draft-bar"><span className="draft-indicator" /> {provenance}
           <span className="draft-storage">Not stored on a server</span>
@@ -137,10 +128,6 @@ export function FrancanglaisWorkspace() {
           aria-label="Import input JSON" hidden onChange={importInput} />
         <p className="operation-notice" role="status">{notice}</p>
         {importError && <p className="operation-error" role="alert">{importError}</p>}
-      </main>
-      <footer className="app-footer"><span>COMPILER CONSTRUCTION / 2026</span>
-        <span>Cameroonian Francanglais <span className="footer-dot" /> Single-variety study</span>
-      </footer>
-    </div>
+    </>
   )
 }
