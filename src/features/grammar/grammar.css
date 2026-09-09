@@ -1,0 +1,37 @@
+.grammar-view { padding: 26px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; animation: enter 320ms 60ms ease-out both; display: flex; flex-direction: column; gap: 28px; }
+.grammar-block { display: flex; flex-direction: column; gap: 10px; }
+.grammar-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.mono { font-family: var(--font-mono); font-size: 13px; }
+
+.rule-list { display: flex; flex-direction: column; gap: 12px; }
+.rule-group { display: flex; gap: 10px; border: 1px solid var(--color-border); border-radius: 6px; padding: 10px 12px; }
+.rule-lhs { font-family: var(--font-mono); font-weight: 600; min-width: 64px; }
+.rule-alternatives { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.rule-alt { display: flex; align-items: baseline; gap: 8px; font-family: var(--font-mono); font-size: 13px; margin: 0; }
+.rule-arrow { color: var(--color-cobalt); }
+.rule-rhs { flex: 1; overflow-wrap: anywhere; }
+.rule-id { color: var(--color-muted); font-size: 11px; }
+
+.ledger-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.ledger-list li { border: 1px solid var(--color-border); border-radius: 6px; padding: 10px 12px; }
+.ledger-list p { margin: 4px 0 0; font-size: 13px; }
+.ledger-kind { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-cobalt); font-weight: 600; }
+.ledger-ids { color: var(--color-muted); }
+
+.lexicon-table th, .lexicon-table td { white-space: nowrap; }
+.lexicon-table td:last-child, .lexicon-table th:last-child { white-space: normal; }
+
+.ll1-table-wrap { max-height: 480px; overflow: auto; }
+.ll1-table { min-width: 100%; }
+.ll1-table th, .ll1-table td { text-align: center; white-space: nowrap; }
+.ll1-table thead th { position: sticky; top: 0; z-index: 2; background: #f9faf9; }
+.ll1-corner { position: sticky; left: 0; top: 0; z-index: 3; }
+.ll1-row-head { position: sticky; left: 0; z-index: 1; background: #f9faf9; text-align: left; }
+.ll1-cell { min-width: 64px; }
+
+@media (max-width: 900px) {
+  .grammar-columns { grid-template-columns: 1fr; }
+}
+@media (max-width: 540px) {
+  .grammar-view { padding: 18px; }
+}

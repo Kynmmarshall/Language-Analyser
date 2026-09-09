@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './features/auth/AuthContext'
 import { LoginView } from './features/auth/LoginView'
 import { FrancanglaisWorkspace } from './features/analyzer/FrancanglaisWorkspace'
 import { CorpusView } from './features/corpus/CorpusView'
+import { GrammarView } from './features/grammar/GrammarView'
 import { NavLink, RouterProvider, useRouter } from './domain/router'
 import './features/analyzer/workspace.css'
 
@@ -32,6 +33,7 @@ function RouteOutlet() {
     if (status !== 'signed-in') return <LoginView />
     return <CorpusView />
   }
+  if (path === '/grammar') return <GrammarView />
   return <FrancanglaisWorkspace />
 }
 
@@ -51,6 +53,7 @@ function AppShell() {
         <nav className="app-nav" aria-label="Primary">
           <NavLink to="/" className={navClass}>Analyzer</NavLink>
           <NavLink to="/corpus" className={navClass}>Corpus</NavLink>
+          <NavLink to="/grammar" className={navClass}>Grammar</NavLink>
           <span className="workspace-marker">Workspace <ArrowUpRight size={16} aria-hidden="true" /></span>
           <AuthStatus />
         </nav>

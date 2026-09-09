@@ -64,6 +64,64 @@ export type ParseResult = Readonly<{
 
 export type TopicMatch = Readonly<{ topic: string; matched_terms: readonly string[] }>
 
+export type LexicalEntry = Readonly<{
+  canonical: string
+  terminal: string
+  part_of_speech: string
+  is_slang: boolean
+  language_candidates: readonly LanguageLabel[]
+  rule_id: string
+  evidence_statement_ids: readonly string[]
+  description: string
+}>
+
+export type Production = Readonly<{
+  id: string
+  lhs: string
+  rhs: readonly string[]
+  evidence_statement_ids: readonly string[]
+  description: string
+}>
+
+export type GrammarSpec = Readonly<{
+  version: string
+  start_symbol: string
+  terminals: readonly string[]
+  nonterminals: readonly string[]
+  productions: readonly Production[]
+}>
+
+export type TransformationKind = 'left_recursion_elimination' | 'left_factoring'
+
+export type TransformationStep = Readonly<{
+  kind: TransformationKind
+  description: string
+  source_production_ids: readonly string[]
+  result_production_ids: readonly string[]
+}>
+
+export type SymbolSet = Readonly<{ symbol: string; terminals: readonly string[] }>
+
+export type TableEntry = Readonly<{ nonterminal: string; terminal: string; production_id: string }>
+
+export type TableConflict = Readonly<{
+  nonterminal: string
+  terminal: string
+  production_ids: readonly string[]
+}>
+
+export type GrammarView = Readonly<{
+  lexicon: readonly LexicalEntry[]
+  descriptive_grammar: GrammarSpec
+  grammar: GrammarSpec
+  transformation_steps: readonly TransformationStep[]
+  nullable: readonly string[]
+  first: readonly SymbolSet[]
+  follow: readonly SymbolSet[]
+  table_entries: readonly TableEntry[]
+  table_conflicts: readonly TableConflict[]
+}>
+
 export type AnalyzeResponse = Readonly<{
   tokens: readonly Token[]
   parse: ParseResult
@@ -137,6 +195,10 @@ export function logout(): Promise<void> {
 
 export function fetchCurrentUser(): Promise<UserPublic> {
   return apiRequest<UserPublic>('/api/auth/me')
+}
+
+export function fetchGrammar(): Promise<GrammarView> {
+  return apiRequest<GrammarView>('/api/grammar')
 }
 
 export type StatementPrivate = Readonly<{
