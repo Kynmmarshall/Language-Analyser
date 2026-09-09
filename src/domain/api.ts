@@ -128,6 +128,21 @@ export type AnalyzeResponse = Readonly<{
   topics: readonly TopicMatch[]
 }>
 
+export type FrequencyItem = Readonly<{ term: string; count: number }>
+
+export type StatisticsView = Readonly<{
+  statement_count: number
+  accepted_count: number
+  rejected_count: number
+  skipped_invalid_count: number
+  raw_frequency: readonly FrequencyItem[]
+  canonical_frequency: readonly FrequencyItem[]
+  terminal_frequency: readonly FrequencyItem[]
+  unknown_words: readonly string[]
+  topic_counts: readonly FrequencyItem[]
+  language_candidate_counts: readonly FrequencyItem[]
+}>
+
 export class AnalysisApiError extends Error {
   status: number
   constructor(message: string, status = 0) {
@@ -199,6 +214,10 @@ export function fetchCurrentUser(): Promise<UserPublic> {
 
 export function fetchGrammar(): Promise<GrammarView> {
   return apiRequest<GrammarView>('/api/grammar')
+}
+
+export function fetchStatistics(): Promise<StatisticsView> {
+  return apiRequest<StatisticsView>('/api/statistics')
 }
 
 export type StatementPrivate = Readonly<{
