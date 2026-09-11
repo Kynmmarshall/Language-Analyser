@@ -255,30 +255,6 @@
 }
 
 @layer components {
-  /* LEGACY COMPAT — consumed only by the not-yet-migrated feature CSS files.
-     Delete this block in Phase 9 once every screen uses Tailwind utilities. */
-  :root {
-    --color-primary: var(--app-accent);
-    --color-primary-hover: var(--app-accent-hover);
-    --color-cobalt: var(--app-info);
-    --color-gold: var(--app-highlight);
-    --color-border: #d6dfd9;
-    --color-control-border: #78847d;
-    --color-success: var(--app-success);
-    --color-success-bg: var(--app-success-subtle);
-    --color-warning: var(--app-warning);
-    --color-warning-bg: var(--app-warning-subtle);
-    --color-error: var(--app-danger);
-    --color-error-bg: var(--app-danger-subtle);
-    --font-body: var(--font-sans);
-    --font-heading: var(--font-display);
-  }
-
-  .dark {
-    --color-border: rgb(255 255 255 / 0.1);
-    --color-control-border: rgb(255 255 255 / 0.24);
-  }
-
   /* Shared surface recipes so every screen elevates identically. */
   .panel {
     background-color: var(--app-surface);
