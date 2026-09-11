@@ -1,13 +1,36 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import { History, Plus, RefreshCw, Upload, X } from 'lucide-react'
+import { AnimatePresence, m } from 'motion/react'
 import {
   AnalysisApiError, createCorpusStatement, getCorpusStatement, listCorpus,
   publishCorpusStatement, unpublishCorpusStatement, updateCorpusStatement,
 } from '../../domain/api'
 import type { StatementCreateRequest, StatementPrivate, StatementUpdateRequest } from '../../domain/api'
+import { pressable, springSmooth } from '../../motion/presets'
 import { CorpusDrawer } from './CorpusDrawer'
 import { CorpusHistoryPanel } from './CorpusHistoryPanel'
-import './corpus.css'
+
+const selectClass =
+  'h-11 rounded-control border border-hairline bg-surface-inset px-3 text-small text-ink transition-colors hover:border-strong focus:border-accent focus:outline-none'
+
+const rowActionClass =
+  'flex h-8 items-center gap-1.5 rounded-control px-2 text-caption font-semibold text-muted transition-colors hover:bg-accent-subtle hover:text-accent disabled:pointer-events-none disabled:opacity-40'
+
+function ErrorBanner({ children }: { children: ReactNode }) {
+  return (
+    <m.p
+      role="alert"
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      transition={springSmooth}
+      className="mb-4 rounded-control border-l-2 border-danger bg-danger-subtle px-4 py-3 text-small text-danger"
+    >
+      {children}
+    </m.p>
+  )
+}
 
 type SourceFilter = 'all' | 'demo' | 'field'
 type PublishFilter = 'all' | 'published' | 'unpublished'
@@ -153,114 +176,187 @@ export function CorpusView() {
     : (editingStatement?.statement_id ?? 'create')
 
   return (
-    <section className="corpus-view" aria-labelledby="corpus-heading">
-      <div className="section-heading">
+    <section className="panel p-6 lg:p-8" aria-labelledby="corpus-heading">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <span className="section-index">CORPUS</span>
-          <h2 id="corpus-heading">Statements</h2>
+          <span className="mb-1.5 block font-mono text-[10px] tracking-[0.14em] text-faint">CORPUS</span>
+          <h2 id="corpus-heading" className="text-h2 text-ink">Statements</h2>
         </div>
-        <div className="corpus-toolbar-actions">
-          <button className="icon-button" type="button" aria-label="Refresh" onClick={refresh}>
-            <RefreshCw size={18} aria-hidden="true" />
-          </button>
-          <button className="primary-button" type="button" onClick={openCreate}>
+        <div className="flex items-center gap-2">
+          <m.button
+            className="grid size-11 place-items-center rounded-control border border-hairline bg-surface text-muted transition-colors hover:border-strong hover:text-ink"
+            type="button"
+            aria-label="Refresh"
+            onClick={refresh}
+            {...pressable}
+          >
+            <RefreshCw size={16} aria-hidden="true" />
+          </m.button>
+          <m.button
+            className="flex h-11 items-center gap-2 rounded-control bg-accent px-4 text-small font-semibold text-accent-contrast shadow-e1 transition-colors hover:bg-accent-hover"
+            type="button"
+            onClick={openCreate}
+            {...pressable}
+          >
             <Plus size={16} aria-hidden="true" /> New statement
-          </button>
+          </m.button>
         </div>
       </div>
 
-      <div className="corpus-filters">
-        <input type="search" aria-label="Search statements" placeholder="Search text, id, or topic"
-          value={search} onChange={(event) => setSearch(event.target.value)} />
-        <select aria-label="Filter by source" value={sourceFilter}
-          onChange={(event) => setSourceFilter(event.target.value as SourceFilter)}>
+      <div className="mb-5 flex flex-wrap gap-2.5">
+        <input
+          type="search"
+          aria-label="Search statements"
+          placeholder="Search text, id, or topic"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          className="h-11 min-w-56 flex-1 rounded-control border border-hairline bg-surface-inset px-3.5 text-small text-ink transition-colors placeholder:text-faint hover:border-strong focus:border-accent focus:outline-none"
+        />
+        <select
+          aria-label="Filter by source"
+          value={sourceFilter}
+          onChange={(event) => setSourceFilter(event.target.value as SourceFilter)}
+          className={selectClass}
+        >
           <option value="all">All sources</option>
           <option value="field">Field</option>
           <option value="demo">Demo</option>
         </select>
-        <select aria-label="Filter by publication status" value={publishFilter}
-          onChange={(event) => setPublishFilter(event.target.value as PublishFilter)}>
+        <select
+          aria-label="Filter by publication status"
+          value={publishFilter}
+          onChange={(event) => setPublishFilter(event.target.value as PublishFilter)}
+          className={selectClass}
+        >
           <option value="all">All statuses</option>
           <option value="published">Published</option>
           <option value="unpublished">Unpublished</option>
         </select>
       </div>
 
-      {loadError && <p className="operation-error" role="alert">{loadError}</p>}
-      {rowActionError && <p className="operation-error" role="alert">{rowActionError}</p>}
+      <AnimatePresence>
+        {loadError && <ErrorBanner key="load-error">{loadError}</ErrorBanner>}
+        {rowActionError && <ErrorBanner key="row-error">{rowActionError}</ErrorBanner>}
+      </AnimatePresence>
 
-      {!statements && !loadError && <p>Loading corpus…</p>}
-      {statements && filtered.length === 0 && <p className="corpus-empty" data-testid="corpus-empty">No statements match.</p>}
+      {!statements && !loadError && <p className="py-4 text-small text-muted">Loading corpus…</p>}
+      {statements && filtered.length === 0 && (
+        <p className="py-6 text-small text-muted" data-testid="corpus-empty">No statements match.</p>
+      )}
 
       {filtered.length > 0 && (
-        <div className="corpus-table-wrap">
-          <table className="corpus-table">
+        <div className="overflow-x-auto rounded-panel border border-hairline">
+          <table className="w-full min-w-[48rem] border-collapse text-small">
             <thead>
-              <tr>
-                <th>ID</th><th>Text</th><th>Source</th><th>Rev.</th>
-                <th>Published</th><th>Topics</th><th>Actions</th>
+              <tr className="bg-surface-sunken text-left">
+                {['ID', 'Text', 'Source', 'Rev.', 'Published', 'Topics', 'Actions'].map((head) => (
+                  <th
+                    key={head}
+                    className="border-b border-hairline px-3 py-2.5 font-semibold whitespace-nowrap text-muted"
+                  >
+                    {head}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.map((statement) => (
-                <tr key={statement.statement_id} data-testid="corpus-row">
-                  <td className="corpus-id" data-testid="corpus-id">{statement.statement_id}</td>
-                  <td className="corpus-text" data-testid="corpus-text">{statement.raw_text}</td>
-                  <td data-testid="corpus-source">{statement.source_kind}</td>
-                  <td data-testid="corpus-revision">{statement.revision}</td>
-                  <td data-testid="corpus-status">
-                    {statement.published_revision === statement.revision ? (
-                      <span className="status-pill status-published">Published</span>
-                    ) : statement.published_revision !== null ? (
-                      <span className="status-pill status-stale">Stale publish</span>
-                    ) : (
-                      <span className="status-pill">Unpublished</span>
-                    )}
-                  </td>
-                  <td className="corpus-topics">{statement.topics.join(', ') || '—'}</td>
-                  <td className="corpus-actions">
-                    <button className="text-button" type="button" onClick={() => openEdit(statement)}>
-                      Edit
-                    </button>
-                    <button className="text-button" type="button"
-                      onClick={() => setHistoryStatementId(statement.statement_id)}>
-                      <History size={14} aria-hidden="true" /> History
-                    </button>
-                    {statement.published_revision === statement.revision ? (
-                      <button className="text-button" type="button" disabled={rowActionId === statement.statement_id}
-                        onClick={() => handleUnpublish(statement)}>
-                        <X size={14} aria-hidden="true" /> Unpublish
-                      </button>
-                    ) : (
-                      <button className="text-button" type="button" disabled={rowActionId === statement.statement_id}
-                        onClick={() => handlePublish(statement)}>
-                        <Upload size={14} aria-hidden="true" /> Publish
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
+              <AnimatePresence initial={false}>
+                {filtered.map((statement) => (
+                  <m.tr
+                    key={statement.statement_id}
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={springSmooth}
+                    data-testid="corpus-row"
+                    className="border-b border-hairline align-top transition-colors last:border-0 hover:bg-surface-inset"
+                  >
+                    <td className="px-3 py-2.5 font-mono text-caption whitespace-nowrap text-ink" data-testid="corpus-id">
+                      {statement.statement_id}
+                    </td>
+                    <td className="max-w-80 px-3 py-2.5 wrap-anywhere text-ink" data-testid="corpus-text">
+                      {statement.raw_text}
+                    </td>
+                    <td className="px-3 py-2.5 text-muted" data-testid="corpus-source">{statement.source_kind}</td>
+                    <td className="tabular px-3 py-2.5 text-muted" data-testid="corpus-revision">{statement.revision}</td>
+                    <td className="px-3 py-2.5" data-testid="corpus-status">
+                      {statement.published_revision === statement.revision ? (
+                        <span className="inline-block rounded-full bg-success-subtle px-2.5 py-0.5 text-caption font-semibold text-success">
+                          Published
+                        </span>
+                      ) : statement.published_revision !== null ? (
+                        <span className="inline-block rounded-full bg-warning-subtle px-2.5 py-0.5 text-caption font-semibold text-warning">
+                          Stale publish
+                        </span>
+                      ) : (
+                        <span className="inline-block rounded-full bg-surface-inset px-2.5 py-0.5 text-caption text-muted">
+                          Unpublished
+                        </span>
+                      )}
+                    </td>
+                    <td className="max-w-48 px-3 py-2.5 text-muted">{statement.topics.join(', ') || '—'}</td>
+                    <td className="px-3 py-2.5">
+                      <div className="flex flex-wrap gap-1 whitespace-nowrap">
+                        <button className={rowActionClass} type="button" onClick={() => openEdit(statement)}>
+                          Edit
+                        </button>
+                        <button
+                          className={rowActionClass}
+                          type="button"
+                          onClick={() => setHistoryStatementId(statement.statement_id)}
+                        >
+                          <History size={13} aria-hidden="true" /> History
+                        </button>
+                        {statement.published_revision === statement.revision ? (
+                          <button
+                            className={rowActionClass}
+                            type="button"
+                            disabled={rowActionId === statement.statement_id}
+                            onClick={() => handleUnpublish(statement)}
+                          >
+                            <X size={13} aria-hidden="true" /> Unpublish
+                          </button>
+                        ) : (
+                          <button
+                            className={rowActionClass}
+                            type="button"
+                            disabled={rowActionId === statement.statement_id}
+                            onClick={() => handlePublish(statement)}
+                          >
+                            <Upload size={13} aria-hidden="true" /> Publish
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </m.tr>
+                ))}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>
       )}
 
-      {drawerMode !== 'closed' && (
-        <CorpusDrawer
-          key={drawerKey}
-          editing={editingStatement}
-          conflict={conflictStatement}
-          submitting={drawerSubmitting}
-          error={drawerError}
-          onCancel={closeDrawer}
-          onCreate={handleCreate}
-          onUpdate={handleUpdate}
-        />
-      )}
+      <AnimatePresence>
+        {drawerMode !== 'closed' && (
+          <CorpusDrawer
+            key={drawerKey}
+            editing={editingStatement}
+            conflict={conflictStatement}
+            submitting={drawerSubmitting}
+            error={drawerError}
+            onCancel={closeDrawer}
+            onCreate={handleCreate}
+            onUpdate={handleUpdate}
+          />
+        )}
+      </AnimatePresence>
 
-      {historyStatementId && (
-        <CorpusHistoryPanel statementId={historyStatementId} onClose={() => setHistoryStatementId(null)} />
-      )}
+      <AnimatePresence>
+        {historyStatementId && (
+          <CorpusHistoryPanel statementId={historyStatementId} onClose={() => setHistoryStatementId(null)} />
+        )}
+      </AnimatePresence>
     </section>
   )
 }
