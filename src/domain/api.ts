@@ -143,6 +143,39 @@ export type StatisticsView = Readonly<{
   language_candidate_counts: readonly FrequencyItem[]
 }>
 
+export type ExportScope = 'all' | 'published'
+
+export type AnalysisResult = Readonly<{
+  statement_revision_id: string
+  tokens: readonly Token[]
+  parse: ParseResult
+  topics: readonly TopicMatch[]
+}>
+
+export type ExportStatement = Readonly<{
+  statement_id: string
+  revision: number
+  source_kind: 'demo' | 'field'
+  raw_text: string
+  topics: readonly string[]
+  collector_id: string | null
+  manual_transcription_attested: boolean | null
+  published: boolean
+  created_at: string
+}>
+
+export type EvidenceBundle = Readonly<{
+  generated_at: string
+  scope: ExportScope
+  analyzer_version: string
+  spec_hash: string
+  lexicon: readonly LexicalEntry[]
+  descriptive_grammar: GrammarSpec
+  grammar: GrammarSpec
+  statements: readonly ExportStatement[]
+  results: readonly AnalysisResult[]
+}>
+
 export class AnalysisApiError extends Error {
   status: number
   constructor(message: string, status = 0) {
@@ -218,6 +251,14 @@ export function fetchGrammar(): Promise<GrammarView> {
 
 export function fetchStatistics(): Promise<StatisticsView> {
   return apiRequest<StatisticsView>('/api/statistics')
+}
+
+export function fetchEvidenceBundle(scope: ExportScope): Promise<EvidenceBundle> {
+  return apiRequest<EvidenceBundle>(`/api/export?scope=${scope}`)
+}
+
+export function evidenceCsvUrl(scope: ExportScope): string {
+  return `${API_BASE_URL}/api/export/csv?scope=${scope}`
 }
 
 export type StatementPrivate = Readonly<{

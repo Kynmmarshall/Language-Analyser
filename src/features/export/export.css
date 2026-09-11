@@ -1,0 +1,17 @@
+.export-view { padding: 26px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; animation: enter 320ms 60ms ease-out both; display: flex; flex-direction: column; gap: 18px; }
+.export-note { color: var(--color-muted); font-size: 14px; margin: 0; }
+.export-scope { display: flex; flex-wrap: wrap; gap: 20px; padding: 12px 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
+.export-scope-option { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+.export-scope-hint { color: var(--color-muted); font-weight: 400; font-size: 13px; }
+.export-meta { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.export-meta > div { display: flex; flex-direction: column; gap: 2px; border: none; padding: 0; }
+.export-meta dt { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+.export-meta dd { text-align: left; }
+.export-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+@media (max-width: 900px) {
+  .export-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 540px) {
+  .export-view { padding: 18px; }
+}

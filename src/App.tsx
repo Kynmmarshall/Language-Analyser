@@ -5,6 +5,7 @@ import { FrancanglaisWorkspace } from './features/analyzer/FrancanglaisWorkspace
 import { CorpusView } from './features/corpus/CorpusView'
 import { GrammarView } from './features/grammar/GrammarView'
 import { StatisticsView } from './features/statistics/StatisticsView'
+import { ExportView } from './features/export/ExportView'
 import { NavLink, RouterProvider, useRouter } from './domain/router'
 import './features/analyzer/workspace.css'
 
@@ -39,6 +40,11 @@ function RouteOutlet() {
     if (status !== 'signed-in') return <LoginView />
     return <StatisticsView />
   }
+  if (path === '/export') {
+    if (status === 'checking') return <p>Loading…</p>
+    if (status !== 'signed-in') return <LoginView />
+    return <ExportView />
+  }
   if (path === '/grammar') return <GrammarView />
   return <FrancanglaisWorkspace />
 }
@@ -61,6 +67,7 @@ function AppShell() {
           <NavLink to="/corpus" className={navClass}>Corpus</NavLink>
           <NavLink to="/grammar" className={navClass}>Grammar</NavLink>
           <NavLink to="/statistics" className={navClass}>Statistics</NavLink>
+          <NavLink to="/export" className={navClass}>Export</NavLink>
           <span className="workspace-marker">Workspace <ArrowUpRight size={16} aria-hidden="true" /></span>
           <AuthStatus />
         </nav>
