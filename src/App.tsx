@@ -1,4 +1,5 @@
 import { ArrowUpRight, LogOut, Quote } from 'lucide-react'
+import { LazyMotion, MotionConfig, domAnimation } from 'motion/react'
 import { AuthProvider, useAuth } from './features/auth/AuthContext'
 import { LoginView } from './features/auth/LoginView'
 import { FrancanglaisWorkspace } from './features/analyzer/FrancanglaisWorkspace'
@@ -7,6 +8,8 @@ import { GrammarView } from './features/grammar/GrammarView'
 import { StatisticsView } from './features/statistics/StatisticsView'
 import { ExportView } from './features/export/ExportView'
 import { NavLink, RouterProvider, useRouter } from './domain/router'
+import { ThemeProvider } from './domain/theme'
+import { springSmooth } from './motion/presets'
 import './features/analyzer/workspace.css'
 
 function navClass(active: boolean) {
@@ -84,10 +87,16 @@ function AppShell() {
 
 export default function App() {
   return (
-    <RouterProvider>
-      <AuthProvider>
-        <AppShell />
-      </AuthProvider>
-    </RouterProvider>
+    <LazyMotion features={domAnimation} strict>
+      <MotionConfig reducedMotion="user" transition={springSmooth}>
+        <ThemeProvider>
+          <RouterProvider>
+            <AuthProvider>
+              <AppShell />
+            </AuthProvider>
+          </RouterProvider>
+        </ThemeProvider>
+      </MotionConfig>
+    </LazyMotion>
   )
 }
