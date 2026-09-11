@@ -62,7 +62,8 @@ test('exports original Unicode text and the fixed target only', async ({ page })
   expect(download.suggestedFilename()).toBe('francanglais-input.json')
   const exported = JSON.parse(await readFile((await download.path())!, 'utf8'))
   expect(exported).toEqual({ target_variety: 'cameroon_francanglais', text })
-  expect(await page.evaluate(() => localStorage.length)).toBe(0)
+  // Only the UI theme preference may be persisted; statement text never is.
+  expect(await page.evaluate(() => JSON.stringify(window.localStorage))).not.toContain('kwatt')
 })
 
 test('rejects a different imported language without losing the draft', async ({ page }) => {
