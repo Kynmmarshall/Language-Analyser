@@ -16,7 +16,7 @@ test('shows reproducible bundle metadata and switches privacy scope', async ({ p
   await expect(page.getByRole('cell', { name: 'e2e_collector' })).toBeVisible()
 
   await page.getByRole('radio', { name: 'Published only', exact: false }).check()
-  await expect(page.locator('dt', { hasText: 'Scope' })).toBeVisible()
+  await expect(page.getByTestId('export-scope')).toBeVisible()
 })
 
 test('downloads a JSON and a CSV evidence bundle', async ({ page }) => {

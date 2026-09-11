@@ -21,7 +21,7 @@ export function AnalysisPanel({ request, result, loading, error, stale, onAnalyz
           <span className="section-index">02 / ANALYSIS</span>
           <h2 id="analysis-heading">Result</h2>
         </div>
-        {showResult && stale && <span className="unavailable-label">Stale</span>}
+        {showResult && stale && <span className="unavailable-label" data-testid="analysis-stale">Stale</span>}
       </div>
 
       {!result && !loading && !error && (
@@ -44,7 +44,7 @@ export function AnalysisPanel({ request, result, loading, error, stale, onAnalyz
       )}
 
       {error && !loading && (
-        <div className="analysis-placeholder analysis-error">
+        <div className="analysis-placeholder analysis-error" data-testid="analysis-error">
           <AlertTriangle size={38} strokeWidth={1.4} aria-hidden="true" />
           <h3>Analysis failed</h3>
           <p role="alert">{error}</p>
@@ -55,8 +55,8 @@ export function AnalysisPanel({ request, result, loading, error, stale, onAnalyz
       )}
 
       {showResult && (
-        <div className={`analysis-result${stale ? ' analysis-result-stale' : ''}`}>
-          <div className="analysis-verdict">
+        <div className={`analysis-result${stale ? ' analysis-result-stale' : ''}`} data-testid="analysis-result">
+          <div className="analysis-verdict" data-testid="analysis-verdict">
             {result.parse.accepted ? (
               <CheckCircle2 size={22} aria-hidden="true" />
             ) : (
@@ -69,9 +69,9 @@ export function AnalysisPanel({ request, result, loading, error, stale, onAnalyz
           )}
 
           <h3 className="analysis-subheading">Tokens</h3>
-          <ol className="token-list">
+          <ol className="token-list" data-testid="token-list">
             {result.tokens.map((token, index) => (
-              <li key={`${token.rule_id}-${index}`}>
+              <li key={`${token.rule_id}-${index}`} data-testid="token-item">
                 <span className="token-raw">{token.raw}</span>
                 <span className="token-terminal">{token.terminal}</span>
                 <span className="token-pos">{token.part_of_speech}</span>

@@ -23,7 +23,7 @@ test('runs a real analysis and renders the accepted grammatical result', async (
   await page.getByRole('button', { name: 'Analyze statement' }).click()
   await expect(page.getByText('Grammatically accepted')).toBeVisible()
   await expect(page.getByText('Analysis failed')).toHaveCount(0)
-  const tokens = page.locator('.token-list li')
+  const tokens = page.getByTestId('token-item')
   await expect(tokens).toHaveCount(4)
   await expect(tokens.first()).toContainText('Combi')
   await expect(page.getByText('commuting', { exact: false })).toBeVisible()
@@ -48,9 +48,9 @@ test('editing input after a result marks it stale and re-analysis clears stalene
   await page.getByRole('button', { name: 'Analyze statement' }).click()
   await expect(page.getByText('Grammatically accepted')).toBeVisible()
   await page.getByLabel('Original wording').fill('Combi va au kwatt !')
-  await expect(page.getByText('Stale')).toBeVisible()
+  await expect(page.getByTestId('analysis-stale')).toBeVisible()
   await page.getByRole('button', { name: 'Re-analyze' }).click()
-  await expect(page.getByText('Stale')).toHaveCount(0)
+  await expect(page.getByTestId('analysis-stale')).toHaveCount(0)
 })
 
 test('exports original Unicode text and the fixed target only', async ({ page }) => {
@@ -123,5 +123,5 @@ test('keyboard entry and reduced motion', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'Skip to workspace' })).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(page.locator('main')).toBeFocused()
-  expect(await page.locator('.workbench').evaluate((element) => getComputedStyle(element).animationName)).toBe('none')
+  expect(await page.getByTestId('workbench').evaluate((element) => getComputedStyle(element).animationName)).toBe('none')
 })

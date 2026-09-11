@@ -190,7 +190,7 @@ export function CorpusView() {
       {rowActionError && <p className="operation-error" role="alert">{rowActionError}</p>}
 
       {!statements && !loadError && <p>Loading corpus…</p>}
-      {statements && filtered.length === 0 && <p className="corpus-empty">No statements match.</p>}
+      {statements && filtered.length === 0 && <p className="corpus-empty" data-testid="corpus-empty">No statements match.</p>}
 
       {filtered.length > 0 && (
         <div className="corpus-table-wrap">
@@ -203,12 +203,12 @@ export function CorpusView() {
             </thead>
             <tbody>
               {filtered.map((statement) => (
-                <tr key={statement.statement_id}>
-                  <td className="corpus-id">{statement.statement_id}</td>
-                  <td className="corpus-text">{statement.raw_text}</td>
-                  <td>{statement.source_kind}</td>
-                  <td>{statement.revision}</td>
-                  <td>
+                <tr key={statement.statement_id} data-testid="corpus-row">
+                  <td className="corpus-id" data-testid="corpus-id">{statement.statement_id}</td>
+                  <td className="corpus-text" data-testid="corpus-text">{statement.raw_text}</td>
+                  <td data-testid="corpus-source">{statement.source_kind}</td>
+                  <td data-testid="corpus-revision">{statement.revision}</td>
+                  <td data-testid="corpus-status">
                     {statement.published_revision === statement.revision ? (
                       <span className="status-pill status-published">Published</span>
                     ) : statement.published_revision !== null ? (

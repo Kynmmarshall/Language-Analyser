@@ -115,7 +115,7 @@ export function FrancanglaisWorkspace() {
         <div className="draft-bar"><span className="draft-indicator" /> {provenance}
           <span className="draft-storage">Not stored on a server</span>
         </div>
-        <div className="workbench">
+        <div className="workbench" data-testid="workbench">
           <StatementEditor text={text} error={text ? validationError : null}
             canExport={Boolean(request)} onChange={(value) => updateDraft(value,
               provenance === 'Synthetic demo' ? 'Synthetic demo' : 'Local draft')}

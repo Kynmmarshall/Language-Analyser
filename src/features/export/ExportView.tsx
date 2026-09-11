@@ -103,7 +103,7 @@ export function ExportView() {
       {bundle && (
         <>
           <dl className="analysis-meta export-meta">
-            <div><dt>Scope</dt><dd>{bundle.scope}</dd></div>
+            <div><dt>Scope</dt><dd data-testid="export-scope">{bundle.scope}</dd></div>
             <div><dt>Analyzer version</dt><dd className="mono">{bundle.analyzer_version}</dd></div>
             <div><dt>Spec hash</dt><dd className="mono">{bundle.spec_hash}</dd></div>
             <div><dt>Generated</dt><dd>{new Date(bundle.generated_at).toLocaleString()}</dd></div>
