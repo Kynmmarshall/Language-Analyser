@@ -6,15 +6,51 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/')
 })
 
-test('one fixed target, explicit demo provenance, no fake analyzer', async ({ page }) => {
+test('one fixed target, explicit demo provenance, real analyzer connection', async ({ page }) => {
   await expect(page).toHaveTitle('Francanglais Studio')
   await expect(page.getByRole('combobox')).toHaveCount(0)
+  await expect(page.getByText('Analyzer connected')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Analyze statement' })).toBeDisabled()
   await expect(page.getByRole('button', { name: 'Export input' })).toBeDisabled()
   await page.getByRole('button', { name: 'Demo example' }).click()
   await expect(page.getByText('Synthetic demo', { exact: false }).first()).toBeVisible()
   await expect(page.getByLabel('Input request JSON')).toContainText('cameroon_francanglais')
-  await expect(page.getByText('Awaiting analyzer')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Analyze statement' })).toBeEnabled()
+})
+
+test('runs a real analysis and renders the accepted grammatical result', async ({ page }) => {
+  await page.getByLabel('Original wording').fill('Combi va au kwatt.')
+  await page.getByRole('button', { name: 'Analyze statement' }).click()
+  await expect(page.getByText('Grammatically accepted')).toBeVisible()
+  await expect(page.getByText('Analysis failed')).toHaveCount(0)
+  const tokens = page.locator('.token-list li')
+  await expect(tokens).toHaveCount(4)
+  await expect(tokens.first()).toContainText('Combi')
+  await expect(page.getByText('commuting', { exact: false })).toBeVisible()
+})
+
+test('runs a real analysis and renders a syntax rejection', async ({ page }) => {
+  await page.getByLabel('Original wording').fill('Va combi.')
+  await page.getByRole('button', { name: 'Analyze statement' }).click()
+  await expect(page.getByText('Rejected by the grammar')).toBeVisible()
+  await expect(page.getByText('Reason:', { exact: false })).toBeVisible()
+})
+
+test('runs a real analysis and reports a lexical unknown-word rejection', async ({ page }) => {
+  await page.getByLabel('Original wording').fill('On go au marché.')
+  await page.getByRole('button', { name: 'Analyze statement' }).click()
+  await expect(page.getByText('Rejected by the grammar')).toBeVisible()
+  await expect(page.getByText('lexical unknown token', { exact: false })).toBeVisible()
+})
+
+test('editing input after a result marks it stale and re-analysis clears staleness', async ({ page }) => {
+  await page.getByLabel('Original wording').fill('Combi va au kwatt.')
+  await page.getByRole('button', { name: 'Analyze statement' }).click()
+  await expect(page.getByText('Grammatically accepted')).toBeVisible()
+  await page.getByLabel('Original wording').fill('Combi va au kwatt !')
+  await expect(page.getByText('Stale')).toBeVisible()
+  await page.getByRole('button', { name: 'Re-analyze' }).click()
+  await expect(page.getByText('Stale')).toHaveCount(0)
 })
 
 test('exports original Unicode text and the fixed target only', async ({ page }) => {
