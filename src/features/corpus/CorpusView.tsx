@@ -8,6 +8,7 @@ import {
 } from '../../domain/api'
 import type { StatementCreateRequest, StatementPrivate, StatementUpdateRequest } from '../../domain/api'
 import { pressable, springSmooth } from '../../motion/presets'
+import { useMagnetic } from '../../motion/useMagnetic'
 import { CorpusDrawer } from './CorpusDrawer'
 import { CorpusHistoryPanel } from './CorpusHistoryPanel'
 
@@ -197,6 +198,7 @@ export function CorpusView() {
             type="button"
             onClick={openCreate}
             {...pressable}
+            {...magnetic}
           >
             <Plus size={16} aria-hidden="true" /> New statement
           </m.button>
@@ -245,7 +247,12 @@ export function CorpusView() {
       )}
 
       {filtered.length > 0 && (
-        <div className="overflow-x-auto rounded-panel border border-hairline">
+        <div
+          className="overflow-x-auto rounded-panel border border-hairline"
+          role="region"
+          aria-label="Corpus statements"
+          tabIndex={0}
+        >
           <table className="w-full min-w-[48rem] border-collapse text-small">
             <thead>
               <tr className="bg-surface-sunken text-left">

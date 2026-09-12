@@ -178,7 +178,12 @@ export function ExportView() {
           {bundle.statements.length === 0 ? (
             <p className="py-4 text-small text-muted">No statements in this scope yet.</p>
           ) : (
-            <div className="overflow-x-auto rounded-panel border border-hairline">
+            <div
+              className="overflow-x-auto rounded-panel border border-hairline"
+              role="region"
+              aria-label="Exported statements"
+              tabIndex={0}
+            >
               <table className="w-full min-w-[42rem] border-collapse text-small">
                 <thead>
                   <tr className="bg-surface-sunken text-left">

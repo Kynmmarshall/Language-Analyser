@@ -4,9 +4,11 @@ import { LogIn, ShieldCheck } from 'lucide-react'
 import { AnimatePresence, m } from 'motion/react'
 import { useAuth } from './AuthContext'
 import { fadeInUp, pressable, springSmooth, staggerContainer } from '../../motion/presets'
+import { useMagnetic } from '../../motion/useMagnetic'
 
 export function LoginView() {
   const { login } = useAuth()
+  const magnetic = useMagnetic()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -105,6 +107,7 @@ export function LoginView() {
           disabled={submitting}
           className="mt-7 flex h-11 w-full items-center justify-center gap-2 rounded-control bg-accent text-small font-semibold text-accent-contrast shadow-e1 transition-colors hover:bg-accent-hover disabled:opacity-60"
           {...(submitting ? {} : pressable)}
+          {...(submitting ? {} : magnetic)}
         >
           {submitting ? 'Signing in…' : 'Sign in'} <LogIn size={16} aria-hidden="true" />
         </m.button>

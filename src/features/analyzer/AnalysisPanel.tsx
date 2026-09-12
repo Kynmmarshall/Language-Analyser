@@ -4,6 +4,7 @@ import type { AnalysisRequest } from '../../domain/francanglais'
 import { TARGET_LABEL } from '../../domain/francanglais'
 import type { AnalyzeResponse } from '../../domain/api'
 import { fadeInUp, pressable, springSmooth, staggerContainer } from '../../motion/presets'
+import { useMagnetic } from '../../motion/useMagnetic'
 
 type Props = Readonly<{
   request: AnalysisRequest | null
@@ -19,6 +20,7 @@ const actionClass =
 
 export function AnalysisPanel({ request, result, loading, error, stale, onAnalyze }: Props) {
   const showResult = result && !loading
+  const magnetic = useMagnetic()
 
   return (
     <section
@@ -67,6 +69,7 @@ export function AnalysisPanel({ request, result, loading, error, stale, onAnalyz
               disabled={!request}
               onClick={onAnalyze}
               {...(request ? pressable : {})}
+              {...(request ? magnetic : {})}
             >
               Analyze statement <ArrowRight size={15} aria-hidden="true" />
             </m.button>
@@ -235,6 +238,7 @@ export function AnalysisPanel({ request, result, loading, error, stale, onAnalyz
         </summary>
         <pre
           aria-label="Input request JSON"
+          tabIndex={0}
           className="m-0 max-h-64 overflow-auto rounded-control border-l-2 border-highlight bg-surface-inset p-3.5 font-mono text-caption leading-[1.8] wrap-anywhere whitespace-pre-wrap text-secondary"
         >
           {request ? JSON.stringify(request, null, 2) : 'No valid input.'}

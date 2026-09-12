@@ -135,7 +135,7 @@ export function GrammarView() {
 
       <m.div variants={fadeInUp} className="flex flex-col gap-3">
         <h3 className={subheadingClass}>Lexical specification</h3>
-        <div className={tableWrapClass}>
+        <div className={tableWrapClass} role="region" aria-label="Lexical specification" tabIndex={0}>
           <table className="w-full min-w-[46rem] border-collapse text-small">
             <thead>
               <tr className="bg-surface-sunken text-left">
@@ -209,7 +209,7 @@ export function GrammarView() {
         </div>
         <div className="flex flex-col gap-3">
           <h3 className={subheadingClass}>FIRST / FOLLOW</h3>
-          <div className={tableWrapClass}>
+          <div className={tableWrapClass} role="region" aria-label="FIRST and FOLLOW sets" tabIndex={0}>
             <table className="w-full border-collapse text-small">
               <thead>
                 <tr className="bg-surface-sunken text-left">
@@ -238,7 +238,12 @@ export function GrammarView() {
 
       <m.div variants={fadeInUp} className="flex flex-col gap-3">
         <h3 className={subheadingClass}>LL(1) table</h3>
-        <div className="max-h-[30rem] overflow-auto rounded-panel border border-hairline">
+        <div
+          className="max-h-[30rem] overflow-auto rounded-panel border border-hairline"
+          role="region"
+          aria-label="LL(1) parsing table"
+          tabIndex={0}
+        >
           <table className="w-full border-collapse text-center text-small">
             <thead>
               <tr className="bg-surface-sunken">

@@ -36,7 +36,12 @@ function FrequencyTable({ title, items }: Readonly<{ title: string; items: reado
       {items.length === 0 ? (
         <p className="text-small text-muted">No data yet.</p>
       ) : (
-        <div className="max-h-80 overflow-y-auto rounded-panel border border-hairline">
+        <div
+          className="max-h-80 overflow-y-auto rounded-panel border border-hairline"
+          role="region"
+          aria-label={title}
+          tabIndex={0}
+        >
           <table className="w-full border-collapse text-small">
             <thead>
               <tr className="bg-surface-sunken text-left">
