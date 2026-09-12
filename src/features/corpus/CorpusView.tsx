@@ -37,6 +37,7 @@ type SourceFilter = 'all' | 'demo' | 'field'
 type PublishFilter = 'all' | 'published' | 'unpublished'
 
 export function CorpusView() {
+  const magnetic = useMagnetic()
   const [statements, setStatements] = useState<StatementPrivate[] | null>(null)
   const [loadError, setLoadError] = useState('')
   const [search, setSearch] = useState('')

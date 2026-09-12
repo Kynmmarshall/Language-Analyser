@@ -50,8 +50,3 @@ export const pressable = {
   whileTap: { scale: 0.985 },
   transition: springSnappy,
 } as const
-
-export const liftOnHover = {
-  whileHover: { y: -2 },
-  transition: springSnappy,
-} as const
