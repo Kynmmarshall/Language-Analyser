@@ -225,26 +225,48 @@ The interface should feel intentional and finished, without becoming a marketing
 Define shared CSS variables and reuse the same semantics in charts, diagrams, and exports.
 Use neutral surfaces for most of the canvas, forest green for principal actions, cobalt
 for secondary selection/focus, and restrained warm accents. Avoid a single-hue wash,
-purple gradients, dark-slate dominance, or an all-beige visual theme.
+purple gradients, or an all-beige visual theme.
 
-| Token | Value | Intended use |
-| --- | --- | --- |
-| `--color-canvas` | `#F4F6F5` | Main neutral canvas beneath subtle texture |
-| `--color-surface` | `#FFFFFF` | Editor, menus, tables, and dialogs |
-| `--color-ink` | `#1F2924` | Primary text |
-| `--color-muted` | `#56645C` | Secondary text, never disabled-only contrast for useful content |
-| `--color-primary` | `#17664A` | Primary actions with white text |
-| `--color-primary-hover` | `#105039` | Primary hover/pressed emphasis |
-| `--color-cobalt` | `#2E5BCC` | Links, focus rings, secondary selection |
-| `--color-gold` | `#E2BC58` | Sparse decorative accents; not small text on white |
-| `--color-border` | `#D6DFD9` | Decorative separators, not sole interactive boundaries |
-| `--color-control-border` | `#78847D` | Necessary input/control boundaries |
-| `--color-success` | `#17664A` | Supported/accepted status text |
-| `--color-success-bg` | `#E8F3EC` | Success status background |
-| `--color-warning` | `#83540C` | Unknown vocabulary or review-needed text |
-| `--color-warning-bg` | `#FFF3D6` | Warning background |
-| `--color-error` | `#AD3546` | Rejection/operation-error text with a specific reason |
-| `--color-error-bg` | `#FBECEF` | Error background |
+The implementation uses Tailwind v4 with a CSS-first `@theme` block in
+`src/styles/theme.css`. Semantic variables are declared on `:root` and overridden under
+`html.dark`, so components reference one token name per role and never carry `dark:`
+prefixes. Token names below are the published names; the implementation prefixes the
+raw variables `--app-*` and exposes them to Tailwind as the `--color-*` utilities noted.
+
+Light is the default and remains the reference implementation: it is the palette all
+contrast and screenshot evidence is based on. Dark is an opt-in companion theme selected
+by the reader, persisted in `localStorage` and applied before first paint.
+
+| Token | Light | Dark | Intended use |
+| --- | --- | --- | --- |
+| `--color-canvas` | `#F7F9F8` | `#0C1015` | Main neutral canvas beneath subtle texture |
+| `--color-surface` | `#FFFFFF` | `#131A22` | Editor, menus, tables, and dialogs |
+| `--color-surface-raised` | `#FFFFFF` | `#1A222C` | Drawers, dialogs, popovers |
+| `--color-surface-sunken` | `#F1F4F2` | `#090D12` | Table headers and wells |
+| `--color-ink` | `#16201B` | `#F2F5F7` | Primary text |
+| `--color-muted` | `#465A50` | `#A9B6C2` | Secondary text, never disabled-only contrast for useful content |
+| `--color-faint` | `#66756C` | `#7D8B99` | Metadata and captions |
+| `--color-accent` | `#17664A` | `#35C892` | Primary actions with contrasting text |
+| `--color-accent-hover` | `#10523A` | `#4FD9A6` | Primary hover/pressed emphasis |
+| `--color-info` | `#2E5BCC` | `#6690FF` | Links, focus rings, secondary selection |
+| `--color-highlight` | `#E2BC58` | `#F0C96A` | Sparse decorative accents; not small text |
+| `--color-hairline` | `rgb(31 41 36 / .10)` | `rgb(255 255 255 / .08)` | Decorative separators, not sole interactive boundaries |
+| `--color-strong` | `rgb(31 41 36 / .22)` | `rgb(255 255 255 / .18)` | Necessary input/control boundaries |
+| `--color-success` | `#17664A` | `#35C892` | Supported/accepted status text |
+| `--color-success-subtle` | `#E8F3EC` | `rgb(53 200 146 / .12)` | Success status background |
+| `--color-warning` | `#83540C` | `#F5B544` | Unknown vocabulary or review-needed text |
+| `--color-warning-subtle` | `#FFF3D6` | `rgb(245 181 68 / .14)` | Warning background |
+| `--color-danger` | `#AD3546` | `#FF6B7A` | Rejection/operation-error text with a specific reason |
+| `--color-danger-subtle` | `#FBECEF` | `rgb(255 107 122 / .14)` | Error background |
+
+Elevation is mode-adaptive under one set of token names: light renders `--shadow-e1/e2/e3`
+as soft drop shadows, while dark renders them as progressive surface lightening plus a
+one-pixel top highlight, because drop shadows do not read against a dark canvas.
+
+Both themes are audited automatically. `e2e/dark-theme.spec.ts` runs axe-core against
+every screen with `.dark` applied, covering WCAG 2.0/2.1/2.2 A and AA; the light theme is
+covered by the existing check in `e2e/analyzer.spec.ts`. Accessibility claims rest on
+those runs, not on visual inspection.
 
 Always distinguish lexical categories from acceptance/review states. Token highlighting
 uses a stable, labelled POS legend; borrowed origin is additional metadata, not an
@@ -378,8 +400,9 @@ works. They directly improve understanding and demonstration quality.
 
 Defer independent language modes, automatic transcription/translation, LLM-generated
 analysis, unrestricted online grammar/regex editing, real-time co-editing, a second
-parser algorithm, multi-tenant signup, and a decorative landing page. A second theme
-is optional later; one fully tested, visually coherent theme comes first.
+parser algorithm, multi-tenant signup, and a decorative landing page. The light theme
+was completed and tested first; the dark companion theme was added afterwards against
+the same token contract and is covered by its own automated accessibility suite.
 
 ## 10. Immediate Next Implementation
 

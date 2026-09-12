@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { MapPin, Wifi, WifiOff } from 'lucide-react'
+import { AnimatePresence, m } from 'motion/react'
 import { createAnalysisRequest, inputError, parseAnalysisRequest } from '../../domain/francanglais'
 import { analyzeStatement, AnalysisApiError } from '../../domain/api'
 import type { AnalyzeResponse } from '../../domain/api'
+import { fadeInUp, springSmooth, staggerContainer } from '../../motion/presets'
 import { AnalysisPanel } from './AnalysisPanel'
 import { StatementEditor } from './StatementEditor'
-import './workspace.css'
 
 const DEMO_TEXT = 'Combi, on go au kwatt.'
 
@@ -99,35 +100,80 @@ export function FrancanglaisWorkspace() {
 
   return (
     <>
-      <div className="workspace-heading">
-        <div>
-          <p className="location"><MapPin size={14} aria-hidden="true" /> Yaound&eacute;, Cameroon</p>
-          <h1>Francanglais Studio<span className="title-dot">.</span></h1>
-        </div>
-        <p className="connection-status" id="analyzer-status">
+      <m.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+        className="mb-7 flex flex-wrap items-end justify-between gap-4"
+      >
+        <m.div variants={fadeInUp}>
+          <p className="mb-2 flex items-center gap-1.5 text-small text-muted">
+            <MapPin size={14} aria-hidden="true" /> Yaound&eacute;, Cameroon
+          </p>
+          <h1 className="text-display text-ink">
+            Francanglais Studio<span className="text-accent">.</span>
+          </h1>
+        </m.div>
+        <m.p
+          variants={fadeInUp}
+          className="flex items-center gap-2 text-small text-muted"
+          id="analyzer-status"
+        >
           {analysisError && !analyzing ? (
-            <><WifiOff size={16} aria-hidden="true" /> Analyzer unreachable</>
+            <>
+              <span className="size-1.5 rounded-full bg-danger" />
+              <WifiOff size={15} aria-hidden="true" /> Analyzer unreachable
+            </>
           ) : (
-            <><Wifi size={16} aria-hidden="true" /> Analyzer connected</>
+            <>
+              <span className="size-1.5 rounded-full bg-success" />
+              <Wifi size={15} aria-hidden="true" /> Analyzer connected
+            </>
           )}
-        </p>
-        </div>
-        <div className="draft-bar"><span className="draft-indicator" /> {provenance}
-          <span className="draft-storage">Not stored on a server</span>
-        </div>
-        <div className="workbench">
-          <StatementEditor text={text} error={text ? validationError : null}
-            canExport={Boolean(request)} onChange={(value) => updateDraft(value,
-              provenance === 'Synthetic demo' ? 'Synthetic demo' : 'Local draft')}
-            onClear={clearDraft} onImport={() => fileInput.current?.click()}
-            onExport={exportInput} onExample={() => updateDraft(DEMO_TEXT, 'Synthetic demo')} />
-          <AnalysisPanel request={request} result={result} loading={analyzing}
-            error={analysisError} stale={stale} onAnalyze={runAnalysis} />
-        </div>
-        <input ref={fileInput} type="file" accept=".json,application/json"
-          aria-label="Import input JSON" hidden onChange={importInput} />
-        <p className="operation-notice" role="status">{notice}</p>
-        {importError && <p className="operation-error" role="alert">{importError}</p>}
+        </m.p>
+      </m.div>
+
+      <div className="mb-px flex flex-wrap items-center gap-2 border-t border-hairline py-3.5 text-caption text-muted">
+        <span className="size-1.5 shrink-0 rounded-full bg-info" />
+        {provenance}
+        <span className="ml-auto text-faint">Not stored on a server</span>
+      </div>
+
+      <m.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...springSmooth, delay: 0.05 }}
+        className="panel grid grid-cols-1 overflow-hidden lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]"
+        data-testid="workbench"
+      >
+        <StatementEditor text={text} error={text ? validationError : null}
+          canExport={Boolean(request)} onChange={(value) => updateDraft(value,
+            provenance === 'Synthetic demo' ? 'Synthetic demo' : 'Local draft')}
+          onClear={clearDraft} onImport={() => fileInput.current?.click()}
+          onExport={exportInput} onExample={() => updateDraft(DEMO_TEXT, 'Synthetic demo')} />
+        <AnalysisPanel request={request} result={result} loading={analyzing}
+          error={analysisError} stale={stale} onAnalyze={runAnalysis} />
+      </m.div>
+
+      <input ref={fileInput} type="file" accept=".json,application/json"
+        aria-label="Import input JSON" hidden onChange={importInput} />
+
+      <p className="min-h-7 pt-3 text-small text-accent" role="status">{notice}</p>
+
+      <AnimatePresence>
+        {importError && (
+          <m.p
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={springSmooth}
+            className="rounded-control border-l-2 border-danger bg-danger-subtle px-4 py-3 text-small text-danger"
+            role="alert"
+          >
+            {importError}
+          </m.p>
+        )}
+      </AnimatePresence>
     </>
   )
 }

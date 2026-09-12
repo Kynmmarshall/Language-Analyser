@@ -6,6 +6,20 @@
     <meta name="theme-color" content="#17664a" />
     <meta name="description" content="Francanglais Studio: a compiler construction workspace for Cameroonian Francanglais." />
     <title>Francanglais Studio</title>
+    <script>
+      // Applies the stored theme before first paint so dark-mode loads never flash white.
+      (function () {
+        try {
+          var stored = localStorage.getItem('francanglais-theme')
+          var dark = stored
+            ? stored === 'dark'
+            : window.matchMedia('(prefers-color-scheme: dark)').matches
+          if (dark) document.documentElement.classList.add('dark')
+        } catch (error) {
+          /* storage unavailable: fall through to the light default */
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

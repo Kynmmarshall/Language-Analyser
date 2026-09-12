@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { AlertTriangle, Download, FileJson, FileSpreadsheet } from 'lucide-react'
+import { m } from 'motion/react'
 import { evidenceCsvUrl, fetchEvidenceBundle, AnalysisApiError } from '../../domain/api'
 import type { EvidenceBundle, ExportScope } from '../../domain/api'
-import '../corpus/corpus.css'
-import './export.css'
+import { fadeInUp, pressable, staggerContainer } from '../../motion/presets'
 
 function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob)
@@ -64,75 +64,137 @@ export function ExportView() {
   }
 
   return (
-    <section className="export-view" aria-labelledby="export-heading">
-      <div className="section-heading">
-        <div>
-          <span className="section-index">EVIDENCE EXPORT</span>
-          <h2 id="export-heading">Reproducible bundle</h2>
-        </div>
-      </div>
+    <m.section
+      className="panel flex flex-col gap-5 p-6 lg:p-8"
+      aria-labelledby="export-heading"
+      variants={staggerContainer}
+      initial="hidden"
+      animate="visible"
+    >
+      <m.div variants={fadeInUp}>
+        <span className="mb-1.5 block font-mono text-[10px] tracking-[0.14em] text-faint">
+          EVIDENCE EXPORT
+        </span>
+        <h2 id="export-heading" className="text-h2 text-ink">Reproducible bundle</h2>
+      </m.div>
 
-      <p className="export-note">
+      <m.p variants={fadeInUp} className="max-w-2xl text-small text-muted">
         This bundle is raw evidence (grammar, lexicon, statements, and analysis results) for
         the reviewed academic report and submission — it is not the report itself.
-      </p>
+      </m.p>
 
-      <div className="export-scope">
-        <label className="export-scope-option">
-          <input type="radio" name="scope" value="published" checked={scope === 'published'}
-            onChange={() => setScope('published')} />
-          Published only <span className="export-scope-hint">(privacy-redacted, safe to share)</span>
-        </label>
-        <label className="export-scope-option">
-          <input type="radio" name="scope" value="all" checked={scope === 'all'}
-            onChange={() => setScope('all')} />
-          All statements <span className="export-scope-hint">(includes drafts and collector identity)</span>
-        </label>
-      </div>
+      <m.div
+        variants={fadeInUp}
+        className="flex flex-wrap gap-x-6 gap-y-3 border-y border-hairline py-4"
+      >
+        {([
+          { value: 'published', label: 'Published only', hint: '(privacy-redacted, safe to share)' },
+          { value: 'all', label: 'All statements', hint: '(includes drafts and collector identity)' },
+        ] as const).map((option) => (
+          <label
+            key={option.value}
+            className="flex cursor-pointer items-center gap-2.5 text-small font-semibold text-ink"
+          >
+            <input
+              type="radio"
+              name="scope"
+              value={option.value}
+              checked={scope === option.value}
+              onChange={() => setScope(option.value)}
+              className="size-4 accent-[var(--app-accent)]"
+            />
+            {option.label}
+            <span className="font-normal text-caption text-faint">{option.hint}</span>
+          </label>
+        ))}
+      </m.div>
 
       {error && (
-        <div className="analysis-placeholder analysis-error">
-          <AlertTriangle size={38} strokeWidth={1.4} aria-hidden="true" />
-          <h3>Could not load the export</h3>
-          <p role="alert">{error}</p>
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <AlertTriangle size={34} strokeWidth={1.4} aria-hidden="true" className="text-danger" />
+          <h3 className="text-h3 text-ink">Could not load the export</h3>
+          <p role="alert" className="text-small text-danger">{error}</p>
         </div>
       )}
 
-      {!bundle && !error && <p>Loading export preview…</p>}
+      {!bundle && !error && <p className="text-small text-muted">Loading export preview…</p>}
 
       {bundle && (
         <>
-          <dl className="analysis-meta export-meta">
-            <div><dt>Scope</dt><dd>{bundle.scope}</dd></div>
-            <div><dt>Analyzer version</dt><dd className="mono">{bundle.analyzer_version}</dd></div>
-            <div><dt>Spec hash</dt><dd className="mono">{bundle.spec_hash}</dd></div>
-            <div><dt>Generated</dt><dd>{new Date(bundle.generated_at).toLocaleString()}</dd></div>
-            <div><dt>Statements</dt><dd>{bundle.statements.length}</dd></div>
+          <dl className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+            {[
+              { term: 'Scope', value: bundle.scope, testId: 'export-scope', mono: false },
+              { term: 'Analyzer version', value: bundle.analyzer_version, mono: true },
+              { term: 'Spec hash', value: bundle.spec_hash, mono: true },
+              { term: 'Generated', value: new Date(bundle.generated_at).toLocaleString(), mono: false },
+              { term: 'Statements', value: String(bundle.statements.length), mono: false },
+            ].map((item) => (
+              <div key={item.term} className="flex min-w-0 flex-col gap-1">
+                <dt className="text-[10px] tracking-[0.06em] text-faint uppercase">{item.term}</dt>
+                <dd
+                  className={`m-0 wrap-anywhere text-small text-ink ${item.mono ? 'font-mono' : ''}`}
+                  data-testid={item.testId}
+                >
+                  {item.value}
+                </dd>
+              </div>
+            ))}
           </dl>
 
-          <div className="export-actions">
-            <button className="primary-button" type="button" disabled={downloading !== null}
-              onClick={downloadJson}>
+          <div className="flex flex-wrap gap-2.5">
+            <m.button
+              className="flex h-11 items-center gap-2 rounded-control bg-accent px-4 text-small font-semibold text-accent-contrast shadow-e1 transition-colors hover:bg-accent-hover disabled:opacity-60"
+              type="button"
+              disabled={downloading !== null}
+              onClick={downloadJson}
+              {...(downloading ? {} : pressable)}
+            >
               <FileJson size={16} aria-hidden="true" />
-              {downloading === 'json' ? 'Preparing…' : 'Download JSON'} <Download size={14} aria-hidden="true" />
-            </button>
-            <button className="secondary-button" type="button" disabled={downloading !== null}
-              onClick={downloadCsv}>
+              {downloading === 'json' ? 'Preparing…' : 'Download JSON'}
+              <Download size={14} aria-hidden="true" />
+            </m.button>
+            <m.button
+              className="flex h-11 items-center gap-2 rounded-control border border-hairline bg-surface px-4 text-small font-semibold text-ink transition-colors hover:border-strong disabled:opacity-60"
+              type="button"
+              disabled={downloading !== null}
+              onClick={downloadCsv}
+              {...(downloading ? {} : pressable)}
+            >
               <FileSpreadsheet size={16} aria-hidden="true" />
-              {downloading === 'csv' ? 'Preparing…' : 'Download CSV'} <Download size={14} aria-hidden="true" />
-            </button>
+              {downloading === 'csv' ? 'Preparing…' : 'Download CSV'}
+              <Download size={14} aria-hidden="true" />
+            </m.button>
           </div>
-          {downloadError && <p className="operation-error" role="alert">{downloadError}</p>}
+
+          {downloadError && (
+            <p
+              className="rounded-control border-l-2 border-danger bg-danger-subtle px-4 py-3 text-small text-danger"
+              role="alert"
+            >
+              {downloadError}
+            </p>
+          )}
 
           {bundle.statements.length === 0 ? (
-            <p className="corpus-empty">No statements in this scope yet.</p>
+            <p className="py-4 text-small text-muted">No statements in this scope yet.</p>
           ) : (
-            <div className="corpus-table-wrap">
-              <table className="corpus-table">
+            <div
+              className="overflow-x-auto rounded-panel border border-hairline"
+              role="region"
+              aria-label="Exported statements"
+              tabIndex={0}
+            >
+              <table className="w-full min-w-[42rem] border-collapse text-small">
                 <thead>
-                  <tr>
-                    <th>ID</th><th>Text</th><th>Source</th><th>Published</th>
-                    <th>Collector</th><th>Accepted</th>
+                  <tr className="bg-surface-sunken text-left">
+                    {['ID', 'Text', 'Source', 'Published', 'Collector', 'Accepted'].map((head) => (
+                      <th
+                        key={head}
+                        className="border-b border-hairline px-3 py-2.5 font-semibold whitespace-nowrap text-muted"
+                      >
+                        {head}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -141,13 +203,20 @@ export function ExportView() {
                       (r) => r.statement_revision_id === `${statement.statement_id}@${statement.revision}`,
                     )
                     return (
-                      <tr key={statement.statement_id}>
-                        <td className="corpus-id">{statement.statement_id}</td>
-                        <td className="corpus-text">{statement.raw_text}</td>
-                        <td>{statement.source_kind}</td>
-                        <td>{statement.published ? 'yes' : 'no'}</td>
-                        <td>{statement.collector_id ?? <em>redacted</em>}</td>
-                        <td>{result?.parse.accepted ? 'yes' : 'no'}</td>
+                      <tr
+                        key={statement.statement_id}
+                        className="border-b border-hairline align-top transition-colors last:border-0 hover:bg-surface-inset"
+                      >
+                        <td className="px-3 py-2.5 font-mono text-caption whitespace-nowrap text-ink">
+                          {statement.statement_id}
+                        </td>
+                        <td className="max-w-80 px-3 py-2.5 wrap-anywhere text-ink">{statement.raw_text}</td>
+                        <td className="px-3 py-2.5 text-muted">{statement.source_kind}</td>
+                        <td className="px-3 py-2.5 text-muted">{statement.published ? 'yes' : 'no'}</td>
+                        <td className="px-3 py-2.5 text-muted">
+                          {statement.collector_id ?? <em className="text-faint">redacted</em>}
+                        </td>
+                        <td className="px-3 py-2.5 text-muted">{result?.parse.accepted ? 'yes' : 'no'}</td>
                       </tr>
                     )
                   })}
@@ -157,6 +226,6 @@ export function ExportView() {
           )}
         </>
       )}
-    </section>
+    </m.section>
   )
 }
