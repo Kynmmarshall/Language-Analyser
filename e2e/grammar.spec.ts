@@ -15,7 +15,7 @@ test('renders the lexicon, rule views, ledger, and a conflict-free LL(1) table',
   await expect(page.getByRole('heading', { name: 'Transformed (executable) rules' })).toBeVisible()
 
   await expect(page.getByRole('heading', { name: 'Transformation ledger' })).toBeVisible()
-  await expect(page.getByText('left factoring', { exact: false })).toBeVisible()
+  await expect(page.getByText('left factoring', { exact: false }).first()).toBeVisible()
 
   await expect(page.getByRole('heading', { name: 'Nullable' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'LL(1) table' })).toBeVisible()

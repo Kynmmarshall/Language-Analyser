@@ -30,7 +30,8 @@ test('runs a real analysis and renders the accepted grammatical result', async (
 })
 
 test('runs a real analysis and renders a syntax rejection', async ({ page }) => {
-  await page.getByLabel('Original wording').fill('Va combi.')
+  // Verb-first is a valid imperative now, so this uses input with no possible parse.
+  await page.getByLabel('Original wording').fill('Le le le.')
   await page.getByRole('button', { name: 'Analyze statement' }).click()
   await expect(page.getByText('Rejected by the grammar')).toBeVisible()
   await expect(page.getByText('Reason:', { exact: false })).toBeVisible()
