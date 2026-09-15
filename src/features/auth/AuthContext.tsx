@@ -1,12 +1,19 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { AnalysisApiError, fetchCurrentUser, login as loginRequest, logout as logoutRequest } from '../../domain/api'
+import {
+  AnalysisApiError,
+  fetchCurrentUser,
+  login as loginRequest,
+  logout as logoutRequest,
+  signup as signupRequest,
+} from '../../domain/api'
 import type { UserPublic } from '../../domain/api'
 
 type AuthContextValue = Readonly<{
   user: UserPublic | null
   status: 'checking' | 'signed-out' | 'signed-in'
   login: (username: string, password: string) => Promise<void>
+  signup: (username: string, password: string, signupCode: string) => Promise<void>
   logout: () => Promise<void>
 }>
 
@@ -39,6 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('signed-in')
   }, [])
 
+  const signup = useCallback(
+    async (username: string, password: string, signupCode: string) => {
+      const current = await signupRequest(username, password, signupCode)
+      setUser(current)
+      setStatus('signed-in')
+    },
+    [],
+  )
+
   const logout = useCallback(async () => {
     try {
       await logoutRequest()
@@ -50,8 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, status, login, logout }),
-    [user, status, login, logout],
+    () => ({ user, status, login, signup, logout }),
+    [user, status, login, signup, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

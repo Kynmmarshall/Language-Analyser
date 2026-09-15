@@ -1,7 +1,9 @@
-import { LogOut, Moon, Quote, Sun } from 'lucide-react'
+import { useEffect } from 'react'
+import { LogIn, LogOut, Moon, Quote, Sun } from 'lucide-react'
 import { AnimatePresence, LazyMotion, MotionConfig, domAnimation, m } from 'motion/react'
 import { AuthProvider, useAuth } from './features/auth/AuthContext'
 import { LoginView } from './features/auth/LoginView'
+import { SignupView } from './features/auth/SignupView'
 import { FrancanglaisWorkspace } from './features/analyzer/FrancanglaisWorkspace'
 import { CorpusView } from './features/corpus/CorpusView'
 import { GrammarView } from './features/grammar/GrammarView'
@@ -49,7 +51,27 @@ function ThemeToggle() {
 
 function AuthStatus() {
   const { user, status, logout } = useAuth()
-  if (status !== 'signed-in' || !user) return null
+  const { path, navigate } = useRouter()
+
+  if (status === 'checking') return null
+
+  if (status !== 'signed-in' || !user) {
+    if (path === '/login' || path === '/signup') return null
+    return (
+      <m.button
+        type="button"
+        onClick={() => navigate('/login')}
+        data-testid="header-sign-in"
+        className="flex h-9 items-center gap-1.5 rounded-full border border-hairline bg-surface px-3 text-caption font-semibold text-muted transition-colors hover:border-strong hover:text-ink"
+        initial={{ opacity: 0, x: 8 }}
+        animate={{ opacity: 1, x: 0, transition: springSmooth }}
+        {...pressable}
+      >
+        Sign in <LogIn size={13} aria-hidden="true" />
+      </m.button>
+    )
+  }
+
   return (
     <m.span
       initial={{ opacity: 0, x: 8 }}
@@ -67,6 +89,25 @@ function AuthStatus() {
         Sign out <LogOut size={13} aria-hidden="true" />
       </m.button>
     </m.span>
+  )
+}
+
+/** Standalone /login page: bounces to the corpus once a session exists. */
+function LoginRoute() {
+  const { status } = useAuth()
+  const { path, navigate } = useRouter()
+  const showSignup = path === '/signup'
+
+  useEffect(() => {
+    if (status === 'signed-in') navigate('/corpus')
+  }, [status, navigate])
+
+  if (status === 'checking') return <p className="text-small text-muted">Loading…</p>
+  if (status === 'signed-in') return null
+  return showSignup ? (
+    <SignupView onShowLogin={() => navigate('/login')} />
+  ) : (
+    <LoginView onShowSignup={() => navigate('/signup')} />
   )
 }
 
@@ -105,22 +146,26 @@ function ShellNav() {
 }
 
 function RouteOutlet() {
-  const { path } = useRouter()
+  const { path, navigate } = useRouter()
   const { status } = useAuth()
+
+  if (path === '/login' || path === '/signup') return <LoginRoute />
+
+  const gate = <LoginView onShowSignup={() => navigate('/signup')} />
 
   if (path === '/corpus') {
     if (status === 'checking') return <p>Loading…</p>
-    if (status !== 'signed-in') return <LoginView />
+    if (status !== 'signed-in') return gate
     return <CorpusView />
   }
   if (path === '/statistics') {
     if (status === 'checking') return <p>Loading…</p>
-    if (status !== 'signed-in') return <LoginView />
+    if (status !== 'signed-in') return gate
     return <StatisticsView />
   }
   if (path === '/export') {
     if (status === 'checking') return <p>Loading…</p>
-    if (status !== 'signed-in') return <LoginView />
+    if (status !== 'signed-in') return gate
     return <ExportView />
   }
   if (path === '/grammar') return <GrammarView />

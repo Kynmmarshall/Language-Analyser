@@ -1,44 +1,40 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { LogIn, ShieldCheck, UserPlus } from 'lucide-react'
+import { KeyRound, UserPlus } from 'lucide-react'
 import { AnimatePresence, m } from 'motion/react'
-import { fetchSignupStatus } from '../../domain/api'
+import { AnalysisApiError } from '../../domain/api'
 import { useAuth } from './AuthContext'
 import { fadeInUp, pressable, springSmooth, staggerContainer } from '../../motion/presets'
 import { useMagnetic } from '../../motion/useMagnetic'
 
-export function LoginView({ onShowSignup }: Readonly<{ onShowSignup?: () => void }> = {}) {
-  const { login } = useAuth()
+const fieldClass =
+  'h-11 w-full rounded-control border border-hairline bg-surface-inset px-3.5 text-body text-ink transition-colors placeholder:text-faint hover:border-strong focus:border-accent focus:outline-none'
+
+export function SignupView({ onShowLogin }: Readonly<{ onShowLogin: () => void }>) {
+  const { signup } = useAuth()
   const magnetic = useMagnetic()
-  const [signupEnabled, setSignupEnabled] = useState(false)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-    fetchSignupStatus()
-      .then((s) => { if (!cancelled) setSignupEnabled(s.enabled) })
-      .catch(() => { if (!cancelled) setSignupEnabled(false) })
-    return () => { cancelled = true }
-  }, [])
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault()
     setSubmitting(true)
     setError('')
     try {
-      await login(username, password)
-    } catch {
-      setError('Invalid username or password.')
+      await signup(username, password, code)
+    } catch (caught) {
+      setError(
+        caught instanceof AnalysisApiError
+          ? caught.message
+          : 'Could not create the account. Try again.',
+      )
     } finally {
       setSubmitting(false)
     }
   }
-
-  const fieldClass =
-    'h-11 w-full rounded-control border border-hairline bg-surface-inset px-3.5 text-body text-ink transition-colors placeholder:text-faint hover:border-strong focus:border-accent focus:outline-none'
 
   return (
     <div className="grid min-h-[62svh] place-items-center py-6">
@@ -53,46 +49,65 @@ export function LoginView({ onShowSignup }: Readonly<{ onShowSignup?: () => void
           variants={fadeInUp}
           className="flex items-center gap-2 font-mono text-[10px] tracking-[0.14em] text-accent"
         >
-          <ShieldCheck size={13} aria-hidden="true" /> RESTRICTED · CORPUS
+          <UserPlus size={13} aria-hidden="true" /> NEW COLLECTOR
         </m.span>
 
         <m.h1 variants={fadeInUp} className="mt-3 text-h1 text-ink">
-          Collector sign-in
+          Create an account
         </m.h1>
 
         <m.p variants={fadeInUp} className="mt-2 text-small text-muted">
-          {signupEnabled
-            ? 'Collector accounts only. Registration needs the team code.'
-            : 'Provisioned collector accounts only. No public signup.'}
+          Registration needs the team code. Accounts can read and edit the private corpus.
         </m.p>
 
         <m.div variants={fadeInUp} className="mt-7 space-y-1.5">
-          <label htmlFor="auth-username" className="block text-caption font-semibold text-muted">
+          <label htmlFor="signup-username" className="block text-caption font-semibold text-muted">
             Username
           </label>
           <input
-            id="auth-username"
+            id="signup-username"
             name="username"
             autoComplete="username"
             required
+            minLength={3}
+            pattern="[A-Za-z0-9_.\-]+"
             value={username}
             onChange={(event) => setUsername(event.target.value)}
             className={fieldClass}
           />
+          <p className="text-caption text-faint">Letters, digits, dot, dash or underscore.</p>
         </m.div>
 
         <m.div variants={fadeInUp} className="mt-4 space-y-1.5">
-          <label htmlFor="auth-password" className="block text-caption font-semibold text-muted">
+          <label htmlFor="signup-password" className="block text-caption font-semibold text-muted">
             Password
           </label>
           <input
-            id="auth-password"
+            id="signup-password"
             name="password"
             type="password"
-            autoComplete="current-password"
+            autoComplete="new-password"
             required
+            minLength={8}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            className={fieldClass}
+          />
+          <p className="text-caption text-faint">At least 8 characters.</p>
+        </m.div>
+
+        <m.div variants={fadeInUp} className="mt-4 space-y-1.5">
+          <label htmlFor="signup-code" className="block text-caption font-semibold text-muted">
+            Team registration code
+          </label>
+          <input
+            id="signup-code"
+            name="signup-code"
+            type="password"
+            autoComplete="off"
+            required
+            value={code}
+            onChange={(event) => setCode(event.target.value)}
             className={fieldClass}
           />
         </m.div>
@@ -100,7 +115,7 @@ export function LoginView({ onShowSignup }: Readonly<{ onShowSignup?: () => void
         <AnimatePresence initial={false}>
           {error && (
             <m.p
-              key="auth-error"
+              key="signup-error"
               role="alert"
               initial={{ opacity: 0, height: 0, marginTop: 0 }}
               animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
@@ -117,28 +132,27 @@ export function LoginView({ onShowSignup }: Readonly<{ onShowSignup?: () => void
           variants={fadeInUp}
           type="submit"
           disabled={submitting}
-          data-testid="login-submit"
+          data-testid="signup-submit"
           className="mt-7 flex h-11 w-full items-center justify-center gap-2 rounded-control bg-accent text-small font-semibold text-accent-contrast shadow-e1 transition-colors hover:bg-accent-hover disabled:opacity-60"
           {...(submitting ? {} : pressable)}
           {...(submitting ? {} : magnetic)}
         >
-          {submitting ? 'Signing in…' : 'Sign in'} <LogIn size={16} aria-hidden="true" />
+          {submitting ? 'Creating account…' : 'Create account'}{' '}
+          <UserPlus size={16} aria-hidden="true" />
         </m.button>
 
-        {signupEnabled && onShowSignup && (
-          <m.p variants={fadeInUp} className="mt-5 text-center text-small text-muted">
-            No account yet?{' '}
-            <button
-              type="button"
-              onClick={onShowSignup}
-              data-testid="switch-to-signup"
-              className="font-semibold text-accent underline-offset-2 hover:underline"
-            >
-              <UserPlus size={13} aria-hidden="true" className="mr-1 inline" />
-              Create one
-            </button>
-          </m.p>
-        )}
+        <m.p variants={fadeInUp} className="mt-5 text-center text-small text-muted">
+          Already have an account?{' '}
+          <button
+            type="button"
+            onClick={onShowLogin}
+            data-testid="switch-to-login"
+            className="font-semibold text-accent underline-offset-2 hover:underline"
+          >
+            <KeyRound size={13} aria-hidden="true" className="mr-1 inline" />
+            Sign in
+          </button>
+        </m.p>
       </m.form>
     </div>
   )

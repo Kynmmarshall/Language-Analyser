@@ -10,7 +10,10 @@ const backendPython = path.join(
   backendRoot, '.venv', process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python',
 )
 // Dedicated, gitignored, idempotently-seeded database — never the developer's real app.db.
-const backendEnv = { YAOUNDE_DATABASE_URL: 'sqlite:///./data/e2e.db' }
+const backendEnv = {
+  YAOUNDE_DATABASE_URL: 'sqlite:///./data/e2e.db',
+  YAOUNDE_SIGNUP_CODE: 'e2e-signup-code',
+}
 
 export default defineConfig({
   testDir: './e2e',

@@ -121,6 +121,10 @@ export function GrammarView() {
         <div>
           <span className="mb-1.5 block font-mono text-[10px] tracking-[0.14em] text-faint">GRAMMAR</span>
           <h2 id="grammar-heading" className="text-h2 text-ink">Specification</h2>
+          <p className="mt-2 max-w-2xl text-small text-muted">
+            The rules the analyzer actually runs: the word list it recognises, the grammar
+            before and after transformation, and the parsing table derived from them.
+          </p>
         </div>
         <span
           className={`rounded-full px-3 py-1 text-caption font-semibold ${

@@ -143,9 +143,13 @@ epsilon, ambiguous-table, and trailing-input cases produce correct bounded behav
 
 - Add FastAPI, SQLite, SQLAlchemy/migrations, private corpus editing, peer review,
   approved public samples, analysis snapshots, and restricted evidence exports.
-- Provision three individual group accounts with no public signup. Use established
-  authentication, revocable database-backed sessions, secure HttpOnly host-only cookies,
-  CSRF/Origin protection, and server-side authorization on every protected operation.
+- Provision individual group accounts. Registration is never open: the CLI
+  `provision-user` command always works, and the self-service `/signup` route stays
+  disabled unless `YAOUNDE_SIGNUP_CODE` is configured, in which case it requires that
+  shared code. Any account can read and edit the private corpus, so the code is a
+  credential and must be treated as one. Use established authentication, revocable
+  database-backed sessions, secure HttpOnly host-only cookies, CSRF/Origin protection,
+  and server-side authorization on every protected operation.
 - Prevent overwritten edits with revision checks and a visible conflict-resolution
   state. Editing published wording invalidates its previous public approval.
 - Generate typed frontend contracts from the API once available. All analysis, tables,
@@ -400,7 +404,7 @@ works. They directly improve understanding and demonstration quality.
 
 Defer independent language modes, automatic transcription/translation, LLM-generated
 analysis, unrestricted online grammar/regex editing, real-time co-editing, a second
-parser algorithm, multi-tenant signup, and a decorative landing page. The light theme
+parser algorithm, open multi-tenant signup, and a decorative landing page. The light theme
 was completed and tested first; the dark companion theme was added afterwards against
 the same token contract and is covered by its own automated accessibility suite.
 

@@ -113,6 +113,10 @@ export function FrancanglaisWorkspace() {
           <h1 className="text-display text-ink">
             Francanglais Studio<span className="text-accent">.</span>
           </h1>
+          <p className="mt-2 max-w-xl text-small text-muted">
+            Type a Francanglais sentence to see how it breaks into words and whether it fits
+            the project grammar. Nothing you type here is saved.
+          </p>
         </m.div>
         <m.p
           variants={fadeInUp}

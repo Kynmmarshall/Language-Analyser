@@ -134,6 +134,10 @@ export function StatisticsView() {
       <m.div variants={fadeInUp}>
         <span className="mb-1.5 block font-mono text-[10px] tracking-[0.14em] text-faint">STATISTICS</span>
         <h2 id="statistics-heading" className="text-h2 text-ink">Corpus evidence</h2>
+        <p className="mt-2 max-w-2xl text-small text-muted">
+          What the corpus shows once every statement is analysed: how many parse successfully,
+          which words recur, which vocabulary is still unrecognised, and where topics appear.
+        </p>
       </m.div>
 
       <m.div variants={staggerContainer} className="grid grid-cols-2 gap-3 lg:grid-cols-4">

@@ -7,7 +7,7 @@ export async function login(page: Page): Promise<void> {
   await page.goto('/corpus')
   await page.getByLabel('Username').fill(E2E_USERNAME)
   await page.getByLabel('Password').fill(E2E_PASSWORD)
-  await page.getByRole('button', { name: 'Sign in' }).click()
+  await page.getByTestId('login-submit').click()
   await page.getByRole('button', { name: 'Sign out' }).waitFor()
 }
 

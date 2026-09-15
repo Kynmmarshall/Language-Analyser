@@ -241,6 +241,21 @@ export function logout(): Promise<void> {
   return apiRequest<void>('/api/auth/logout', { method: 'POST' })
 }
 
+export function fetchSignupStatus(): Promise<{ enabled: boolean }> {
+  return apiRequest<{ enabled: boolean }>('/api/auth/signup')
+}
+
+export function signup(
+  username: string,
+  password: string,
+  signupCode: string,
+): Promise<UserPublic> {
+  return apiRequest<UserPublic>('/api/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify({ username, password, signup_code: signupCode }),
+  })
+}
+
 export function fetchCurrentUser(): Promise<UserPublic> {
   return apiRequest<UserPublic>('/api/auth/me')
 }
