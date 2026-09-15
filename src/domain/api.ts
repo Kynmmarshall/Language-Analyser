@@ -306,11 +306,9 @@ export type StatementRevisionHistoryItem = Readonly<{
 }>
 
 export type StatementCreateRequest = Readonly<{
-  statement_id: string
   source_kind: 'demo' | 'field'
   raw_text: string
   manual_transcription_attested: boolean
-  collector_id: string
   topics?: readonly string[]
 }>
 
@@ -319,7 +317,6 @@ export type StatementUpdateRequest = Readonly<{
   raw_text: string
   source_kind: 'demo' | 'field'
   manual_transcription_attested: boolean
-  collector_id: string
   topics?: readonly string[]
 }>
 

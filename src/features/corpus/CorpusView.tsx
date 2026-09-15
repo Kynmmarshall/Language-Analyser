@@ -114,7 +114,7 @@ export function CorpusView() {
     } catch (error) {
       setDrawerError(
         error instanceof AnalysisApiError && error.status === 409
-          ? `Statement ID "${payload.statement_id}" already exists.`
+          ? 'Another collector just claimed that statement ID. Try again.'
           : error instanceof AnalysisApiError ? error.message : 'Could not create the statement.',
       )
     } finally {

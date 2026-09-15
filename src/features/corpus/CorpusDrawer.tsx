@@ -4,6 +4,7 @@ import { X } from 'lucide-react'
 import { m } from 'motion/react'
 import type { StatementCreateRequest, StatementPrivate, StatementUpdateRequest } from '../../domain/api'
 import { drawerSlide, overlayFade, pressable } from '../../motion/presets'
+import { useAuth } from '../auth/AuthContext'
 
 const TOPIC_OPTIONS = [
   'commuting', 'internet', 'electricity', 'market_bargaining', 'rain', 'fuel',
@@ -18,6 +19,8 @@ const fieldClass =
 const noticeClass =
   'rounded-control border-l-2 border-warning bg-warning-subtle px-3 py-2.5 text-small text-warning'
 
+const metaRowClass = 'flex items-baseline justify-between gap-3 text-caption'
+
 type Props = Readonly<{
   editing: StatementPrivate | null
   conflict: StatementPrivate | null
@@ -30,12 +33,13 @@ type Props = Readonly<{
 
 export function CorpusDrawer({ editing, conflict, submitting, error, onCancel, onCreate, onUpdate }: Props) {
   const source = conflict ?? editing
-  const [statementId, setStatementId] = useState(source?.statement_id ?? '')
+  const { user } = useAuth()
   const [rawText, setRawText] = useState(source?.raw_text ?? '')
   const [sourceKind, setSourceKind] = useState<'demo' | 'field'>(source?.source_kind ?? 'field')
   const [attested, setAttested] = useState(source?.manual_transcription_attested ?? true)
-  const [collectorId, setCollectorId] = useState(source?.collector_id ?? '')
   const [topics, setTopics] = useState<readonly string[]>(source?.topics ?? [])
+
+  const collectorId = source?.collector_id ?? user?.username ?? '—'
 
   function toggleTopic(topic: string) {
     setTopics((current) =>
@@ -51,16 +55,13 @@ export function CorpusDrawer({ editing, conflict, submitting, error, onCancel, o
         raw_text: rawText,
         source_kind: sourceKind,
         manual_transcription_attested: attested,
-        collector_id: collectorId,
         topics,
       })
     } else {
       onCreate({
-        statement_id: statementId,
         raw_text: rawText,
         source_kind: sourceKind,
         manual_transcription_attested: attested,
-        collector_id: collectorId,
         topics,
       })
     }
@@ -110,10 +111,18 @@ export function CorpusDrawer({ editing, conflict, submitting, error, onCancel, o
         )}
         {error && <p className={noticeClass} role="alert">{error}</p>}
 
-        <label htmlFor="drawer-statement-id" className={labelClass}>Statement ID</label>
-        <input id="drawer-statement-id" required disabled={Boolean(editing)}
-          value={statementId} onChange={(event) => setStatementId(event.target.value)}
-          className={`${fieldClass} disabled:bg-surface-sunken disabled:text-faint`} />
+        <dl className="mt-1 grid gap-1.5 rounded-control bg-surface-inset px-3.5 py-3">
+          <div className={metaRowClass}>
+            <dt className="font-semibold text-muted">Statement ID</dt>
+            <dd className="tabular text-ink" data-testid="drawer-statement-id">
+              {editing ? editing.statement_id : 'Assigned on save'}
+            </dd>
+          </div>
+          <div className={metaRowClass}>
+            <dt className="font-semibold text-muted">Collector</dt>
+            <dd className="text-ink" data-testid="drawer-collector-id">{collectorId}</dd>
+          </div>
+        </dl>
 
         <label htmlFor="drawer-raw-text" className={labelClass}>Raw text</label>
         <textarea id="drawer-raw-text" required rows={4}
@@ -127,11 +136,6 @@ export function CorpusDrawer({ editing, conflict, submitting, error, onCancel, o
           <option value="field">Field</option>
           <option value="demo">Demo</option>
         </select>
-
-        <label htmlFor="drawer-collector-id" className={labelClass}>Collector ID</label>
-        <input id="drawer-collector-id" required
-          value={collectorId} onChange={(event) => setCollectorId(event.target.value)}
-          className={fieldClass} />
 
         <label className="mt-2 flex items-center gap-2.5 text-small text-ink">
           <input type="checkbox" checked={attested}

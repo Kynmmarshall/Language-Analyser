@@ -12,8 +12,11 @@ test('shows reproducible bundle metadata and switches privacy scope', async ({ p
   await expect(page.getByText('Spec hash')).toBeVisible()
 
   await page.getByRole('radio', { name: 'All statements', exact: false }).check()
-  await expect(page.getByRole('cell', { name: 'e2e-seed-001' })).toBeVisible()
-  await expect(page.getByRole('cell', { name: 'e2e_collector' })).toBeVisible()
+  // Scope to the seed row: every statement created by the corpus specs now carries
+  // the same (server-assigned) collector, so a bare text match is ambiguous.
+  const seedRow = page.getByRole('row').filter({ hasText: 'e2e-seed-001' })
+  await expect(seedRow.getByRole('cell', { name: 'e2e-seed-001' })).toBeVisible()
+  await expect(seedRow.getByRole('cell', { name: 'e2e_collector' })).toBeVisible()
 
   await page.getByRole('radio', { name: 'Published only', exact: false }).check()
   await expect(page.getByTestId('export-scope')).toBeVisible()
