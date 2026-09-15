@@ -8,7 +8,8 @@ import { useAuth } from '../auth/AuthContext'
 
 const TOPIC_OPTIONS = [
   'commuting', 'internet', 'electricity', 'market_bargaining', 'rain', 'fuel',
-  'roadside_business', 'bendskin', 'security', 'university',
+  'roadside_business', 'bendskin', 'security', 'university', 'food_and_drink',
+  'family', 'greetings', 'nightlife', 'housing',
 ]
 
 const labelClass = 'mt-2 text-caption font-semibold text-muted'
