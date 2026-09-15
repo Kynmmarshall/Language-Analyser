@@ -1,4 +1,15 @@
-import { AlertTriangle, ArrowRight, Braces, CheckCircle2, Loader2, Workflow, XCircle } from 'lucide-react'
+import { useState } from 'react'
+import {
+  AlertTriangle,
+  ArrowRight,
+  Braces,
+  CheckCircle2,
+  ChevronDown,
+  Lightbulb,
+  Loader2,
+  Workflow,
+  XCircle,
+} from 'lucide-react'
 import { AnimatePresence, m } from 'motion/react'
 import type { AnalysisRequest } from '../../domain/francanglais'
 import { TARGET_LABEL } from '../../domain/francanglais'
@@ -21,6 +32,8 @@ const actionClass =
 export function AnalysisPanel({ request, result, loading, error, stale, onAnalyze }: Props) {
   const showResult = result && !loading
   const magnetic = useMagnetic()
+  const [openToken, setOpenToken] = useState<string | null>(null)
+  const [showSuggestions, setShowSuggestions] = useState(false)
 
   return (
     <section
@@ -130,7 +143,7 @@ export function AnalysisPanel({ request, result, loading, error, stale, onAnalyz
             initial="hidden"
             animate="visible"
             exit={{ opacity: 0 }}
-            className={`flex flex-col gap-4 pb-5 transition-opacity ${stale ? 'opacity-55' : ''}`}
+            className="flex flex-col gap-4 pb-5"
           >
             <m.div
               variants={fadeInUp}
@@ -155,6 +168,66 @@ export function AnalysisPanel({ request, result, loading, error, stale, onAnalyz
               </m.p>
             )}
 
+            {result.suggestions.length > 0 && (
+              <m.div variants={fadeInUp} className="-mt-1 flex flex-col gap-2">
+                <m.button
+                  type="button"
+                  data-testid="suggest-fix"
+                  aria-expanded={showSuggestions}
+                  aria-controls="suggestion-list"
+                  onClick={() => setShowSuggestions((open) => !open)}
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-control border border-accent/30 bg-accent-subtle px-4 text-small font-semibold text-accent transition-colors hover:border-accent sm:w-auto"
+                  {...pressable}
+                >
+                  <Lightbulb size={16} aria-hidden="true" />
+                  {showSuggestions ? 'Hide suggestions' : 'Suggest a fix'}
+                </m.button>
+
+                <AnimatePresence initial={false}>
+                  {showSuggestions && (
+                    <m.ul
+                      id="suggestion-list"
+                      data-testid="suggestion-list"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={springSmooth}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex flex-col gap-2">
+                        {result.suggestions.map((suggestion, index) => (
+                          <li
+                            key={`${suggestion.kind}-${index}`}
+                            data-testid="suggestion-item"
+                            className="rounded-control border-l-2 border-accent bg-surface-inset px-3.5 py-2.5 text-small text-ink"
+                          >
+                            <p>{suggestion.message}</p>
+                            {suggestion.replacements.length > 0 && (
+                              <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-caption text-muted">
+                                <span>Try:</span>
+                                {suggestion.replacements.map((word) => (
+                                  <code
+                                    key={word}
+                                    className="rounded bg-surface px-1.5 py-0.5 font-mono text-ink"
+                                  >
+                                    {word}
+                                  </code>
+                                ))}
+                              </p>
+                            )}
+                          </li>
+                        ))}
+                      </div>
+                      <p className="mt-2 text-caption text-faint">
+                        Derived from the parser's own error report, not a language model —
+                        the same input always gives the same advice.
+                      </p>
+                    </m.ul>
+                  )}
+                </AnimatePresence>
+              </m.div>
+            )}
+
             <m.h3
               variants={fadeInUp}
               className="text-caption font-semibold tracking-[0.08em] text-faint uppercase"
@@ -163,23 +236,64 @@ export function AnalysisPanel({ request, result, loading, error, stale, onAnalyz
             </m.h3>
 
             <m.ol variants={staggerContainer} data-testid="token-list" className="flex flex-col gap-1.5">
-              {result.tokens.map((token, index) => (
-                <m.li
-                  key={`${token.rule_id}-${index}`}
-                  variants={fadeInUp}
-                  data-testid="token-item"
-                  className="flex flex-wrap items-center gap-2 rounded-control border border-hairline bg-surface px-3 py-2 text-small"
-                >
-                  <span className="font-semibold text-ink">{token.raw}</span>
-                  <span className="font-mono text-caption text-accent">{token.terminal}</span>
-                  <span className="font-mono text-caption text-faint">{token.part_of_speech}</span>
-                  {token.is_slang && (
-                    <span className="ml-auto rounded-full bg-highlight/15 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-highlight uppercase">
-                      slang
-                    </span>
-                  )}
-                </m.li>
-              ))}
+              {result.tokens.map((token, index) => {
+                const key = `${token.rule_id}-${index}`
+                const details = [
+                  token.description,
+                  token.language_candidates.length > 0
+                    ? `Origin: ${token.language_candidates.join(', ')}`
+                    : '',
+                  `Canonical form: ${token.canonical}`,
+                  `Rule: ${token.rule_id}`,
+                ].filter(Boolean)
+                const expanded = openToken === key
+                return (
+                  <m.li key={key} variants={fadeInUp} data-testid="token-item">
+                    <button
+                      type="button"
+                      aria-expanded={expanded}
+                      aria-controls={`token-details-${index}`}
+                      data-testid="token-toggle"
+                      onClick={() => setOpenToken(expanded ? null : key)}
+                      className="flex w-full flex-wrap items-center gap-2 rounded-control border border-hairline bg-surface px-3 py-2 text-left text-small transition-colors hover:border-strong focus-visible:border-accent focus-visible:outline-none"
+                    >
+                      <span className="font-semibold text-ink">{token.raw}</span>
+                      <span className="font-mono text-caption text-accent">{token.terminal}</span>
+                      <span className="font-mono text-caption text-faint">{token.part_of_speech}</span>
+                      {token.is_slang && (
+                        <span className="rounded-full bg-highlight/15 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-highlight uppercase">
+                          slang
+                        </span>
+                      )}
+                      <ChevronDown
+                        size={15}
+                        aria-hidden="true"
+                        className={`ml-auto shrink-0 text-faint transition-transform ${expanded ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {expanded && (
+                        <m.dl
+                          id={`token-details-${index}`}
+                          data-testid="token-details"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={springSmooth}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-1 flex flex-col gap-1 rounded-control bg-surface-inset px-3.5 py-2.5 text-caption text-muted">
+                            {details.map((line) => <dd key={line}>{line}</dd>)}
+                            {!token.description && (
+                              <dd className="text-faint">No gloss recorded for this entry.</dd>
+                            )}
+                          </div>
+                        </m.dl>
+                      )}
+                    </AnimatePresence>
+                  </m.li>
+                )
+              })}
             </m.ol>
 
             {result.topics.length > 0 && (

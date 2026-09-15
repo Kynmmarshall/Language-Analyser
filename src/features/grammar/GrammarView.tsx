@@ -7,7 +7,13 @@ import { fadeInUp, staggerContainer } from '../../motion/presets'
 
 const EOF_SYMBOL = '$'
 
+function fold(value: string): string {
+  return value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
+}
+
 const subheadingClass = 'text-caption font-semibold tracking-[0.08em] text-faint uppercase'
+const sectionNoteClass = 'max-w-prose text-small text-muted'
+const inlineCodeClass = 'rounded bg-surface-inset px-1 py-0.5 font-mono text-[0.9em] text-ink'
 const tableWrapClass = 'overflow-x-auto rounded-panel border border-hairline'
 const thClass = 'border-b border-hairline px-3 py-2.5 font-semibold whitespace-nowrap text-muted'
 const tdClass = 'px-3 py-2.5 align-top text-muted'
@@ -56,6 +62,7 @@ function RuleList({ grammar }: Readonly<{ grammar: GrammarSpec }>) {
 export function GrammarView() {
   const [data, setData] = useState<GrammarViewData | null>(null)
   const [error, setError] = useState('')
+  const [lexiconSearch, setLexiconSearch] = useState('')
 
   useEffect(() => {
     let cancelled = false
@@ -87,6 +94,24 @@ export function GrammarView() {
     }
     return map
   }, [data])
+
+  const visibleLexicon = useMemo(() => {
+    if (!data) return []
+    // Match the accent-insensitive lookup the lexer uses, so searching 'reseau' finds 'réseau'.
+    const needle = fold(lexiconSearch.trim())
+    if (!needle) return data.lexicon
+    return data.lexicon.filter((entry) =>
+      fold(
+        [
+          entry.canonical,
+          entry.terminal,
+          entry.part_of_speech,
+          entry.description,
+          entry.language_candidates.join(' '),
+        ].join(' '),
+      ).includes(needle),
+    )
+  }, [data, lexiconSearch])
 
   if (error) {
     return (
@@ -138,7 +163,21 @@ export function GrammarView() {
       </m.div>
 
       <m.div variants={fadeInUp} className="flex flex-col gap-3">
-        <h3 className={subheadingClass}>Lexical specification</h3>
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <h3 className={subheadingClass}>Lexical specification</h3>
+          <span className="tabular text-caption text-faint" data-testid="lexicon-count">
+            {visibleLexicon.length} of {data.lexicon.length} entries
+          </span>
+        </div>
+        <input
+          type="search"
+          aria-label="Search the lexicon"
+          placeholder="Search word, terminal, origin, or meaning"
+          value={lexiconSearch}
+          data-testid="lexicon-search"
+          onChange={(event) => setLexiconSearch(event.target.value)}
+          className="h-11 w-full rounded-control border border-hairline bg-surface-inset px-3.5 text-small text-ink transition-colors placeholder:text-faint hover:border-strong focus:border-accent focus:outline-none"
+        />
         <div className={tableWrapClass} role="region" aria-label="Lexical specification" tabIndex={0}>
           <table className="w-full min-w-[46rem] border-collapse text-small">
             <thead>
@@ -149,7 +188,7 @@ export function GrammarView() {
               </tr>
             </thead>
             <tbody>
-              {data.lexicon.map((entry) => (
+              {visibleLexicon.map((entry) => (
                 <tr key={entry.rule_id} className={trClass}>
                   <td className={`${tdClass} font-mono whitespace-nowrap text-ink`}>{entry.canonical}</td>
                   <td className={`${tdClass} font-mono whitespace-nowrap text-accent`}>{entry.terminal}</td>
@@ -165,6 +204,13 @@ export function GrammarView() {
                   <td className={tdClass}>{entry.description}</td>
                 </tr>
               ))}
+              {visibleLexicon.length === 0 && (
+                <tr>
+                  <td className={`${tdClass} text-center`} colSpan={6} data-testid="lexicon-empty">
+                    No lexicon entries match “{lexiconSearch}”.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -173,16 +219,33 @@ export function GrammarView() {
       <m.div variants={fadeInUp} className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="flex flex-col gap-3">
           <h3 className={subheadingClass}>Original rules</h3>
+          <p className={sectionNoteClass}>
+            The grammar as written by hand, describing the sentence shapes Francanglais
+            actually uses. Readable, but not directly usable: rules like{' '}
+            <code className={inlineCodeClass}>Seq → Seq CONJ Unit</code> refer to themselves
+            on the left, which would send a top-down parser into infinite recursion.
+          </p>
           <RuleList grammar={data.descriptive_grammar} />
         </div>
         <div className="flex flex-col gap-3">
           <h3 className={subheadingClass}>Transformed (executable) rules</h3>
+          <p className={sectionNoteClass}>
+            The same language, rewritten mechanically so it can be parsed reading left to
+            right with one word of lookahead. Names ending in{' '}
+            <code className={inlineCodeClass}>'</code> are generated helpers, and{' '}
+            <code className={inlineCodeClass}>ε</code> means “match nothing here”.
+          </p>
           <RuleList grammar={data.grammar} />
         </div>
       </m.div>
 
       <m.div variants={fadeInUp} className="flex flex-col gap-3">
         <h3 className={subheadingClass}>Transformation ledger</h3>
+        <p className={sectionNoteClass}>
+          Every rewrite applied to get from the original rules to the executable ones, and
+          the rule ids it produced. It is the audit trail showing the transformed grammar
+          accepts the same language rather than a different one.
+        </p>
         {data.transformation_steps.length === 0 ? (
           <p className="text-small text-muted">No transformation was necessary.</p>
         ) : (
@@ -207,12 +270,21 @@ export function GrammarView() {
       <m.div variants={fadeInUp} className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="flex flex-col gap-3">
           <h3 className={subheadingClass}>Nullable</h3>
+          <p className={sectionNoteClass}>
+            Rule names that are allowed to match nothing at all. Needed because if a symbol
+            can vanish, the parser has to look past it to decide what comes next.
+          </p>
           <p className="rounded-panel border border-hairline bg-surface-inset p-3.5 font-mono text-small text-ink">
             {data.nullable.length > 0 ? data.nullable.join(', ') : 'none'}
           </p>
         </div>
         <div className="flex flex-col gap-3">
           <h3 className={subheadingClass}>FIRST / FOLLOW</h3>
+          <p className={sectionNoteClass}>
+            FIRST is every word type that can <em>start</em> a symbol; FOLLOW is every word
+            type that can come <em>directly after</em> it. Together they are what let the
+            parser pick the right rule from a single word of lookahead.
+          </p>
           <div className={tableWrapClass} role="region" aria-label="FIRST and FOLLOW sets" tabIndex={0}>
             <table className="w-full border-collapse text-small">
               <thead>
@@ -242,6 +314,13 @@ export function GrammarView() {
 
       <m.div variants={fadeInUp} className="flex flex-col gap-3">
         <h3 className={subheadingClass}>LL(1) table</h3>
+        <p className={sectionNoteClass}>
+          The parser's decision table. Find the row for the rule it is currently expanding
+          and the column for the next word, and the cell names the rule to apply. A blank
+          cell means that word cannot appear there, which is exactly how a syntax error is
+          detected. “Conflict-free” means no cell holds two rules, so one word of lookahead
+          is always enough and no guessing or backtracking is ever needed.
+        </p>
         <div
           className="max-h-[30rem] overflow-auto rounded-panel border border-hairline"
           role="region"

@@ -65,6 +65,9 @@ test.describe('dark theme', () => {
   })
 
   test('grammar has no accessibility violations', async ({ page }) => {
+    // Scanning several hundred lexicon rows plus the LL(1) table takes far longer than
+    // the other pages, and overruns the default budget when the suite runs in parallel.
+    test.slow()
     await page.goto('/grammar')
     await expect(page.getByRole('heading', { name: 'Specification', exact: true })).toBeVisible()
     await expectNoViolations(page)

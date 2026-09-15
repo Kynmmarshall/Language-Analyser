@@ -35,6 +35,7 @@ export type Token = Readonly<{
   is_multiword: boolean
   component_spans: readonly SourceSpan[]
   rule_id: string
+  description: string
   span: SourceSpan
 }>
 
@@ -132,10 +133,18 @@ export type GrammarView = Readonly<{
   table_conflicts: readonly TableConflict[]
 }>
 
+export type Suggestion = Readonly<{
+  kind: 'unknown_word' | 'unexpected_token' | 'trailing_input'
+  message: string
+  span: SourceSpan | null
+  replacements: readonly string[]
+}>
+
 export type AnalyzeResponse = Readonly<{
   tokens: readonly Token[]
   parse: ParseResult
   topics: readonly TopicMatch[]
+  suggestions: readonly Suggestion[]
 }>
 
 export type FrequencyItem = Readonly<{ term: string; count: number }>

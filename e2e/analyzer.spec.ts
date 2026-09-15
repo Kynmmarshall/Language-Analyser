@@ -29,12 +29,50 @@ test('runs a real analysis and renders the accepted grammatical result', async (
   await expect(page.getByText('commuting', { exact: false })).toBeVisible()
 })
 
+test('a token can be opened to read the word its meaning', async ({ page }) => {
+  await page.getByLabel('Original wording').fill('Combi va au kwatt.')
+  await page.getByRole('button', { name: 'Analyze statement' }).click()
+  const first = page.getByTestId('token-item').first()
+  await expect(page.getByTestId('token-details')).toHaveCount(0)
+
+  await first.getByTestId('token-toggle').click()
+  const details = first.getByTestId('token-details')
+  await expect(details).toBeVisible()
+  await expect(details).toContainText('friend')
+  await expect(details).toContainText('demo.lex.combi')
+
+  await first.getByTestId('token-toggle').click()
+  await expect(page.getByTestId('token-details')).toHaveCount(0)
+})
+
 test('runs a real analysis and renders a syntax rejection', async ({ page }) => {
   // Verb-first is a valid imperative now, so this uses input with no possible parse.
   await page.getByLabel('Original wording').fill('Le le le.')
   await page.getByRole('button', { name: 'Analyze statement' }).click()
   await expect(page.getByText('Rejected by the grammar')).toBeVisible()
   await expect(page.getByText('Reason:', { exact: false })).toBeVisible()
+})
+
+test('suggests the nearest lexicon word for a misspelling', async ({ page }) => {
+  await page.getByLabel('Original wording').fill('Le resau ne passe pas.')
+  await page.getByRole('button', { name: 'Analyze statement' }).click()
+  await expect(page.getByText('Rejected by the grammar')).toBeVisible()
+  await expect(page.getByTestId('suggestion-list')).toHaveCount(0)
+
+  await page.getByTestId('suggest-fix').click()
+  const suggestions = page.getByTestId('suggestion-item')
+  await expect(suggestions.first()).toContainText('resau')
+  await expect(suggestions.first()).toContainText('réseau')
+
+  await page.getByTestId('suggest-fix').click()
+  await expect(page.getByTestId('suggestion-list')).toHaveCount(0)
+})
+
+test('offers no fix button when the statement is accepted', async ({ page }) => {
+  await page.getByLabel('Original wording').fill('Combi va au kwatt.')
+  await page.getByRole('button', { name: 'Analyze statement' }).click()
+  await expect(page.getByText('Grammatically accepted')).toBeVisible()
+  await expect(page.getByTestId('suggest-fix')).toHaveCount(0)
 })
 
 test('runs a real analysis and reports a lexical unknown-word rejection', async ({ page }) => {
