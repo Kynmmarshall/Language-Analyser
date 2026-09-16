@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { LogIn, LogOut, Moon, Quote, Sun } from 'lucide-react'
+import { LogIn, LogOut, Moon, Sun } from 'lucide-react'
 import { AnimatePresence, LazyMotion, MotionConfig, domAnimation, m } from 'motion/react'
 import { AuthProvider, useAuth } from './features/auth/AuthContext'
 import { LoginView } from './features/auth/LoginView'
@@ -195,11 +195,17 @@ function AppShell() {
           aria-label="Francanglais Studio home"
         >
           <m.span
-            className="grid size-10 place-items-center rounded-lg bg-accent text-accent-contrast shadow-e1"
+            className="grid size-10 place-items-center overflow-hidden rounded-lg ring-1 ring-hairline shadow-e1"
             whileHover={{ rotate: -6, scale: 1.05 }}
             transition={springSmooth}
           >
-            <Quote size={20} aria-hidden="true" />
+            <img
+              src="/logo-96.png"
+              alt=""
+              width={40}
+              height={40}
+              className="size-full object-contain"
+            />
           </m.span>
           <span className="leading-tight">
             <span className="block text-small font-semibold tracking-wide text-ink">FRANCANGLAIS</span>
