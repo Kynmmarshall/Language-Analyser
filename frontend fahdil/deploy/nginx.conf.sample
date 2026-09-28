@@ -1,0 +1,45 @@
+# Sample Nginx server block for Yo-B.
+#
+# Copy this to /etc/nginx/sites-available/yo-b, adjust `server_name` and the `root`
+# path below to match where this repo lives on your VPS, then:
+#   sudo ln -s /etc/nginx/sites-available/yo-b /etc/nginx/sites-enabled/
+#   sudo nginx -t && sudo systemctl reload nginx
+#
+# This serves the frontend and the backend from the SAME origin (this domain), so the
+# frontend's same-origin fetch("/api/...") calls (see js/app.js, const API = "") just
+# work with no CORS configuration needed.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name your-domain.example;  # <-- change this
+
+    # This repo's frontend/ folder. update.sh leaves files here by default; if you set
+    # WEB_ROOT when running update.sh, point this at WEB_ROOT instead.
+    root /path/to/yo-b/frontend;  # <-- change this
+    index index.html;
+
+    location /assets/ { try_files $uri =404; }
+    location /css/ { try_files $uri =404; }
+    location /js/ { try_files $uri =404; }
+
+    # Backend API: proxied to the PM2-managed waitress process (see backend/deploy/).
+    location /api/ {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+
+# --- HTTPS -----------------------------------------------------------------------------
+# Once a domain points at this VPS, get a certificate and let it manage the HTTPS
+# server block for you (it edits the file above in place and adds a redirect):
+#   sudo apt install certbot python3-certbot-nginx
+#   sudo certbot --nginx -d your-domain.example
