@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yo-B</title>
+<link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="boot-loader" class="boot-loader">
+  <img src="assets/icon.svg" alt="Yo-B" class="boot-loader-logo">
+  <div class="boot-loader-spinner"></div>
+  <p class="boot-loader-text" data-i18n="boot.loading">Chargement de Yo-B…</p>
+</div>
+
+<!-- ================= ONBOARDING ================= -->
+<div id="onboarding" class="onboarding-overlay" hidden>
+  <div class="onboarding-card">
+    <div class="onboarding-step" data-step="1">
+      <h2 data-i18n="onboarding.step1.title">Bienvenue sur Yo-B</h2>
+      <p data-i18n="onboarding.step1.body"></p>
+    </div>
+    <div class="onboarding-step" data-step="2" hidden>
+      <h2 data-i18n="onboarding.step2.title">Lexeur → Grammaire → Parseur</h2>
+      <p data-i18n="onboarding.step2.body"></p>
+    </div>
+    <div class="onboarding-step" data-step="3" hidden>
+      <h2 data-i18n="onboarding.step3.title">Testez et traduisez</h2>
+      <p data-i18n="onboarding.step3.body"></p>
+    </div>
+
+    <div class="onboarding-footer">
+      <div class="onboarding-dots">
+        <span class="dot is-active" data-dot="1"></span>
+        <span class="dot" data-dot="2"></span>
+        <span class="dot" data-dot="3"></span>
+      </div>
+      <div class="onboarding-progress" id="onboarding-progress" data-i18n="onboarding.progress"></div>
+      <div class="onboarding-actions">
+        <button type="button" id="onboarding-skip" class="ghost-btn" data-i18n="onboarding.skip">Passer</button>
+        <button type="button" id="onboarding-back" class="ghost-btn is-invisible" data-i18n="onboarding.back">Précédent</button>
+        <button type="button" id="onboarding-next" class="primary-btn" data-i18n="onboarding.next">Suivant</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="app-shell">
+
+  <aside class="rail">
+    <div class="rail-brand">
+      <img src="assets/icon.svg" alt="Yo-B" class="rail-logo">
+      <div>
+        <div class="rail-brand-name">Yo-B</div>
+        <div class="rail-brand-sub" data-i18n="brand.tagline">street&nbsp;grammar&nbsp;lab</div>
+      </div>
+    </div>
+
+    <div class="lang-switch" role="group" aria-label="Language / Langue">
+      <button type="button" data-lang="fr">FR</button>
+      <button type="button" data-lang="en">EN</button>
+    </div>
+
+    <nav class="rail-nav" id="rail-nav">
+      <button class="rail-link is-active" data-tab="overview" data-i18n="nav.overview">Aperçu</button>
+      <button class="rail-link" data-tab="collection" data-i18n="nav.collection">Collecte de données</button>
+      <button class="rail-link" data-tab="lexical" data-i18n="nav.lexical">Analyse lexicale</button>
+      <button class="rail-link" data-tab="syntax" data-i18n="nav.syntax">Analyse syntaxique</button>
+      <button class="rail-link" data-tab="parser" data-i18n="nav.parser">Testeur / Parseur</button>
+      <button class="rail-link" data-tab="translator" data-i18n="nav.translator">Traducteur</button>
+    </nav>
+
+    <button type="button" id="reopen-onboarding" class="rail-help" data-i18n="nav.help">Aide</button>
+
+    <div class="rail-footer">
+      <span data-i18n="rail.footer.line1">CS4110 — Compiler Construction</span><br>
+      <em data-i18n="rail.footer.line2">Analyse lexicale et syntaxique du parler urbain informel de Yaoundé</em>
+    </div>
+  </aside>
+
+  <main class="stage">
+
+    <!-- ================= OVERVIEW ================= -->
+    <section class="panel is-active" id="panel-overview">
+      <header class="hero">
+        <p class="hero-eyebrow-free" data-i18n="overview.eyebrow"></p>
+        <h1 class="hero-title" data-i18n-html="overview.heroTitle"></h1>
+        <p class="hero-lede" data-i18n="overview.lede"></p>
+      </header>
+
+      <div class="stat-row" id="overview-stats">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-statements">—</div>
+          <div class="stat-label" data-i18n="overview.stat.statements">collected statements</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-tokens">—</div>
+          <div class="stat-label" data-i18n="overview.stat.tokens">distinct tokens seen</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-accept">—</div>
+          <div class="stat-label" data-i18n="overview.stat.accept">sentences accepted by the grammar</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-topics">10</div>
+          <div class="stat-label" data-i18n="overview.stat.topics">topics covered</div>
+        </div>
+      </div>
+
+      <div class="card-grid">
+        <div class="info-card">
+          <h3 data-i18n="overview.card1.title">1 · Collecte</h3>
+          <p data-i18n="overview.card1.body"></p>
+        </div>
+        <div class="info-card">
+          <h3 data-i18n="overview.card2.title">2 · Lexique</h3>
+          <p data-i18n="overview.card2.body"></p>
+        </div>
+        <div class="info-card">
+          <h3 data-i18n="overview.card3.title">3 · Syntaxe</h3>
+          <p data-i18n="overview.card3.body"></p>
+        </div>
+        <div class="info-card">
+          <h3 data-i18n="overview.card4.title">4 · Parseur</h3>
+          <p data-i18n="overview.card4.body"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= DATA COLLECTION ================= -->
+    <section class="panel" id="panel-collection">
+      <header class="panel-head">
+        <h2 data-i18n="collection.title">Collecte de données</h2>
+        <p data-i18n="collection.lede"></p>
+      </header>
+
+      <form class="add-form" id="add-statement-form">
+        <input type="text" id="new-statement-text" data-i18n-placeholder="collection.placeholder" required>
+        <select id="new-statement-topic">
+          <option value="Taxi and commuting issues" data-i18n="collection.topic.taxi"></option>
+          <option value="Poor internet connectivity" data-i18n="collection.topic.internet"></option>
+          <option value="Limited Electricity supply" data-i18n="collection.topic.electricity"></option>
+          <option value="Market bargaining" data-i18n="collection.topic.market"></option>
+          <option value="Rainy season struggles" data-i18n="collection.topic.rain"></option>
+          <option value="Fuel scarcity" data-i18n="collection.topic.fuel"></option>
+          <option value="Roadside business interactions" data-i18n="collection.topic.roadside"></option>
+          <option value="Bendskin communication" data-i18n="collection.topic.bendskin"></option>
+          <option value="Security announcements or checkpoints" data-i18n="collection.topic.security"></option>
+          <option value="Life at the ICT University" data-i18n="collection.topic.university"></option>
+        </select>
+        <button type="submit" data-i18n="collection.addButton">Add statement</button>
+      </form>
+
+      <div class="table-wrap">
+        <table id="statements-table">
+          <thead><tr>
+            <th data-i18n="collection.table.id">#</th>
+            <th data-i18n="collection.table.topic">Topic</th>
+            <th data-i18n="collection.table.statement">Transcribed statement</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= LEXICAL ================= -->
+    <section class="panel" id="panel-lexical">
+      <header class="panel-head">
+        <h2 data-i18n="lexical.title">Analyse lexicale</h2>
+        <p data-i18n="lexical.lede"></p>
+      </header>
+
+      <div class="try-box">
+        <input type="text" id="lexer-input" data-i18n-placeholder="lexical.placeholder">
+        <button id="lexer-run-btn" data-i18n="lexical.analyzeButton">Analyze</button>
+      </div>
+      <div class="token-output" id="lexer-output"></div>
+
+      <h3 class="subhead" data-i18n="lexical.freqHeading">Token frequency across the collected corpus</h3>
+      <div class="freq-layout">
+        <div class="table-wrap">
+          <table id="freq-table">
+            <thead><tr>
+              <th data-i18n="lexical.freqTable.token">Token</th>
+              <th data-i18n="lexical.freqTable.count">Count</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <table id="cat-table">
+            <thead><tr>
+              <th data-i18n="lexical.catTable.category">Category</th>
+              <th data-i18n="lexical.catTable.occurrences">Occurrences</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SYNTAX ================= -->
+    <section class="panel" id="panel-syntax">
+      <header class="panel-head">
+        <h2 data-i18n="syntax.title">Analyse syntaxique</h2>
+        <p data-i18n="syntax.lede"></p>
+      </header>
+
+      <div class="grammar-stages" id="grammar-stages"></div>
+
+      <h3 class="subhead" data-i18n="syntax.firstFollowHeading">FIRST &amp; FOLLOW sets</h3>
+      <div class="freq-layout">
+        <div class="table-wrap">
+          <table id="first-table"><thead><tr>
+            <th data-i18n="syntax.table.nonterminal">Non-terminal</th>
+            <th data-i18n="syntax.table.first">FIRST</th>
+          </tr></thead><tbody></tbody></table>
+        </div>
+        <div class="table-wrap">
+          <table id="follow-table"><thead><tr>
+            <th data-i18n="syntax.table.nonterminal">Non-terminal</th>
+            <th data-i18n="syntax.table.follow">FOLLOW</th>
+          </tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+
+      <h3 class="subhead" data-i18n="syntax.ll1Heading">LL(1) parsing table</h3>
+      <div class="table-wrap">
+        <table id="ll1-table"></table>
+      </div>
+      <p class="ll1-verdict" id="ll1-verdict"></p>
+    </section>
+
+    <!-- ================= PARSER ================= -->
+    <section class="panel" id="panel-parser">
+      <header class="panel-head">
+        <h2 data-i18n="parser.title">Testeur / Parseur LL(1)</h2>
+        <p data-i18n="parser.lede"></p>
+      </header>
+
+      <div class="try-box">
+        <input type="text" id="parser-input" data-i18n-placeholder="parser.placeholder">
+        <button id="parser-run-btn" data-i18n="parser.parseButton">Parse</button>
+      </div>
+      <div id="parser-single-result"></div>
+
+      <div class="suite-header">
+        <h3 class="subhead" data-i18n="parser.suiteHeading">Full test suite (all collected statements)</h3>
+        <button id="run-suite-btn" class="secondary-btn" data-i18n="parser.suiteButton">Run on all statements</button>
+      </div>
+      <div class="table-wrap">
+        <table id="suite-table">
+          <thead><tr>
+            <th data-i18n="parser.suiteTable.statement">Statement</th>
+            <th data-i18n="parser.suiteTable.terminals">Terminals fed to parser</th>
+            <th data-i18n="parser.suiteTable.result">Result</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= TRANSLATOR ================= -->
+    <section class="panel" id="panel-translator">
+      <header class="panel-head">
+        <h2 data-i18n="translator.title">Traducteur</h2>
+        <p data-i18n="translator.lede"></p>
+      </header>
+
+      <div class="translator-controls">
+        <div class="direction-select">
+          <label for="translate-from" data-i18n="translator.fromLabel">Traduire de</label>
+          <select id="translate-from">
+            <option value="pidgin" data-i18n="translator.lang.pidgin"></option>
+            <option value="french" data-i18n="translator.lang.french"></option>
+            <option value="english" data-i18n="translator.lang.english"></option>
+          </select>
+        </div>
+        <div class="direction-arrow" aria-hidden="true">&#8594;</div>
+        <div class="direction-select">
+          <label for="translate-to" data-i18n="translator.toLabel">vers</label>
+          <select id="translate-to">
+            <option value="french" data-i18n="translator.lang.french"></option>
+            <option value="english" data-i18n="translator.lang.english"></option>
+            <option value="pidgin" data-i18n="translator.lang.pidgin"></option>
+          </select>
+        </div>
+      </div>
+      <p class="translate-note warn" id="translate-same-lang-warning" data-i18n="translator.sameLanguage" hidden></p>
+      <p class="translate-note info" id="translate-online-only-warning" data-i18n="translator.onlineOnlyDirection" hidden></p>
+
+      <div class="try-box">
+        <input type="text" id="translate-input" data-i18n-placeholder="translator.placeholder">
+        <button id="translate-run-btn" data-i18n="translator.translateButton">Traduire</button>
+      </div>
+
+      <div id="translate-loading" class="translate-loading" hidden>
+        <span class="spinner"></span> <span data-i18n="translator.loadingText">Traduction en cours…</span>
+      </div>
+
+      <div id="translate-result"></div>
+    </section>
+
+  </main>
+</div>
+
+<script src="js/i18n.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
